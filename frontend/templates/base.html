@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HealthAnalytics IPS{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --sidebar-bg: #0f172a;
+            --sidebar-width: 260px;
+        }
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        /* SIDEBAR */
+        #sidebar {
+            width: var(--sidebar-width); min-height: 100vh;
+            background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 100;
+            transition: transform .3s;
+        }
+        #sidebar .brand {
+            padding: 1.5rem 1rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+        #sidebar .brand h5 { color: #fff; font-weight: 700; margin: 0; font-size: .95rem; }
+        #sidebar .brand small { color: rgba(255,255,255,.5); font-size: .75rem; }
+        #sidebar .nav-link {
+            color: rgba(255,255,255,.65); padding: .65rem 1rem;
+            border-radius: 8px; margin: 2px 8px; display: flex; align-items: center; gap: .6rem;
+            transition: all .2s;
+        }
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            color: #fff; background: rgba(255,255,255,.1);
+        }
+        #sidebar .nav-link i { font-size: 1.1rem; width: 20px; }
+        #sidebar .nav-section {
+            color: rgba(255,255,255,.3); font-size: .7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: .8rem 1.5rem .3rem;
+        }
+        /* MAIN */
+        #main { margin-left: var(--sidebar-width); padding: 0; }
+        .topbar {
+            background: #fff; border-bottom: 1px solid #e9ecef;
+            padding: .75rem 1.5rem; display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 99;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .page-content { padding: 1.5rem; }
+        /* CARDS */
+        .kpi-card {
+            border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            transition: transform .2s;
+        }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .kpi-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        /* STATUS BADGES */
+        .badge-bajo { background: #d1fae5; color: #065f46; }
+        .badge-medio { background: #fef3c7; color: #92400e; }
+        .badge-alto { background: #fee2e2; color: #991b1b; }
+        .badge-critico { background: #fce7f3; color: #9d174d; }
+        /* TABLE */
+        .table-hover tbody tr:hover { background: #f0f4ff; }
+        /* LOADING */
+        #globalLoader {
+            position: fixed; inset: 0; background: rgba(15,23,42,.6);
+            z-index: 9999; display: none; align-items: center; justify-content: center;
+        }
+        #globalLoader .spinner-border { width: 3rem; height: 3rem; }
+        /* TOAST */
+        #toastContainer { position: fixed; bottom: 1rem; right: 1rem; z-index: 9998; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- GLOBAL LOADER -->
+<div id="globalLoader"><div class="spinner-border text-light"></div></div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+    <div class="brand">
+        <div class="d-flex align-items-center gap-2">
+            <div style="background:#0d6efd;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-hospital text-white" style="font-size:.9rem"></i>
+            </div>
+            <div>
+                <h5>HealthAnalytics</h5>
+                <small>IPS Platform</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <div class="nav-section">Principal</div>
+        <a href="/" class="nav-link {% block nav_dashboard %}{% endblock %}">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        <a href="/pacientes/" class="nav-link {% block nav_pacientes %}{% endblock %}">
+            <i class="bi bi-people"></i> Pacientes
+        </a>
+
+        <div class="nav-section mt-2">Datos</div>
+        <a href="/etl/" class="nav-link {% block nav_etl %}{% endblock %}">
+            <i class="bi bi-arrow-repeat"></i> Proceso ETL
+        </a>
+        <a href="/analytics/" class="nav-link {% block nav_analytics %}{% endblock %}">
+            <i class="bi bi-bar-chart-line"></i> Analítica
+        </a>
+
+        <div class="nav-section mt-2">Inteligencia</div>
+        <a href="/ml/" class="nav-link {% block nav_ml %}{% endblock %}">
+            <i class="bi bi-cpu"></i> Machine Learning
+        </a>
+
+        <div class="nav-section mt-2">Sistema</div>
+        <a href="/reportes/" class="nav-link {% block nav_reports %}{% endblock %}">
+            <i class="bi bi-file-earmark-text"></i> Reportes
+        </a>
+        <a href="/api/docs/" target="_blank" class="nav-link">
+            <i class="bi bi-code-slash"></i> API Docs
+        </a>
+    </div>
+
+    <!-- User info at bottom -->
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:1rem;border-top:1px solid rgba(255,255,255,.1)">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width:32px;height:32px;border-radius:50%;background:#0d6efd;display:flex;align-items:center;justify-content:center">
+                <i class="bi bi-person-fill text-white" style="font-size:.8rem"></i>
+            </div>
+            <div style="flex:1;min-width:0">
+                <div id="sidebarUserName" style="color:#fff;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Usuario</div>
+                <div id="sidebarUserRole" style="color:rgba(255,255,255,.4);font-size:.7rem">—</div>
+            </div>
+            <a href="#" onclick="logout()" style="color:rgba(255,255,255,.4)" title="Cerrar sesión">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <h6 class="mb-0 fw-600" style="font-weight:600">{% block page_title %}Dashboard{% endblock %}</h6>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-success" id="topbarStatus">En línea</span>
+            <span id="topbarUser" class="text-muted small"></span>
+        </div>
+    </div>
+
+    <div class="page-content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ─── AUTH UTILITIES ─────────────────────────────────────────────────────────
+const API_BASE = '/api';
+
+function getToken() { return localStorage.getItem('access_token'); }
+function getUser() {
+    try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; }
+}
+
+async function apiCall(url, method = 'GET', body = null, isFormData = false) {
+    const token = getToken();
+    if (!token) { window.location.href = '/login/'; return null; }
+
+    const opts = {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` }
+    };
+    if (body && !isFormData) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(body);
+    } else if (isFormData) {
+        opts.body = body;
+    }
+
+    const res = await fetch(API_BASE + url, opts);
+    if (res.status === 401) {
+        const refreshed = await refreshToken();
+        if (!refreshed) { window.location.href = '/login/'; return null; }
+        opts.headers['Authorization'] = `Bearer ${getToken()}`;
+        return fetch(API_BASE + url, opts).then(r => r.json());
+    }
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || err.detail || `Error ${res.status}`);
+    }
+    return res.json();
+}
+
+async function refreshToken() {
+    const refresh = localStorage.getItem('refresh_token');
+    if (!refresh) return false;
+    try {
+        const res = await fetch(API_BASE + '/auth/token/refresh/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('access_token', data.access);
+            return true;
+        }
+    } catch {}
+    return false;
+}
+
+async function logout() {
+    try {
+        const refresh = localStorage.getItem('refresh_token');
+        if (refresh) await apiCall('/auth/logout/', 'POST', { refresh });
+    } catch {}
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    window.location.href = '/login/';
+}
+
+function showLoader() { document.getElementById('globalLoader').style.display = 'flex'; }
+function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
+
+function showToast(msg, type = 'success') {
+    const id = 'toast_' + Date.now();
+    const icons = { success: 'check-circle-fill', danger: 'x-circle-fill', warning: 'exclamation-triangle-fill', info: 'info-circle-fill' };
+    const html = `
+        <div id="${id}" class="toast align-items-center text-bg-${type} border-0 mb-2" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="bi bi-${icons[type]||'info-circle-fill'} me-2"></i>${msg}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>`;
+    document.getElementById('toastContainer').insertAdjacentHTML('beforeend', html);
+    const toast = new bootstrap.Toast(document.getElementById(id), { delay: 4000 });
+    toast.show();
+    document.getElementById(id).addEventListener('hidden.bs.toast', () => document.getElementById(id)?.remove());
+}
+
+function riskBadge(r) {
+    const map = { 'Bajo': 'badge-bajo', 'Medio': 'badge-medio', 'Alto': 'badge-alto', 'Crítico': 'badge-critico' };
+    return `<span class="badge ${map[r]||'bg-secondary'}">${r}</span>`;
+}
+
+// Init
+(function initUI() {
+    const user = getUser();
+    if (user.nombres) {
+        const name = `${user.nombres} ${user.apellidos || ''}`.trim();
+        document.getElementById('sidebarUserName').textContent = name;
+        document.getElementById('sidebarUserRole').textContent = user.role || '—';
+        document.getElementById('topbarUser').textContent = name;
+    }
+    if (!getToken() && window.location.pathname !== '/login/') {
+        window.location.href = '/login/';
+    }
+})();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

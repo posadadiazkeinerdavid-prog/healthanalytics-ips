@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Pacientes - HealthAnalytics IPS{% endblock %}
+{% block page_title %}Gestión de Pacientes{% endblock %}
+{% block nav_pacientes %}active{% endblock %}
+
+{% block content %}
+<!-- FILTROS -->
+<div class="card border-0 shadow-sm mb-3 p-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Buscar</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Nombre, apellido, diagnóstico...">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-semibold">Riesgo</label>
+            <select id="filterRiesgo" class="form-select">
+                <option value="">Todos</option>
+                <option>Bajo</option><option>Medio</option><option>Alto</option><option>Crítico</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-semibold">Sexo</label>
+            <select id="filterSexo" class="form-select">
+                <option value="">Todos</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-semibold">Crítico</label>
+            <select id="filterCritico" class="form-select">
+                <option value="">Todos</option>
+                <option value="true">Solo críticos</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-primary w-100" onclick="loadPacientes()"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            <button class="btn btn-outline-secondary" onclick="clearFilters()" title="Limpiar"><i class="bi bi-x"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- TABLA -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <span class="fw-semibold">Listado de Pacientes (<span id="totalCount">0</span>)</span>
+        <a href="/api/reportes/csv/" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-download me-1"></i>Exportar CSV
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th><th>Nombre</th><th>Edad/Sexo</th>
+                        <th>IMC</th><th>Presión S.</th><th>Glucosa</th>
+                        <th>Sat.O₂</th><th>Diagnóstico</th><th>Riesgo</th><th>Flags</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPacientes">
+                    <tr><td colspan="10" class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- PAGINACIÓN -->
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+        <small class="text-muted">Mostrando <span id="showingText">0</span> registros</small>
+        <nav>
+            <ul class="pagination pagination-sm mb-0" id="paginacion"></ul>
+        </nav>
+    </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal fade" id="modalPaciente" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i>Detalle del Paciente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">Cargando...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+async function loadPacientes(page = 1) {
+    currentPage = page;
+    const search = document.getElementById('searchInput').value;
+    const riesgo = document.getElementById('filterRiesgo').value;
+    const sexo = document.getElementById('filterSexo').value;
+    const critico = document.getElementById('filterCritico').value;
+
+    let url = `/pacientes/?page=${page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (riesgo) url += `&riesgo=${encodeURIComponent(riesgo)}`;
+    if (sexo) url += `&sexo=${encodeURIComponent(sexo)}`;
+    if (critico) url += `&critico=${critico}`;
+
+    const tbody = document.getElementById('tablaPacientes');
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
+
+    try {
+        const data = await apiCall(url);
+        document.getElementById('totalCount').textContent = data.count || 0;
+        document.getElementById('showingText').textContent = (data.results || []).length;
+        totalPages = Math.ceil((data.count || 0) / 50);
+        renderTabla(data.results || []);
+        renderPaginacion(data.count || 0);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger py-3"><i class="bi bi-exclamation-circle me-2"></i>${err.message}</td></tr>`;
+    }
+}
+
+function renderTabla(pacientes) {
+    const tbody = document.getElementById('tablaPacientes');
+    if (!pacientes.length) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">No se encontraron pacientes</td></tr>';
+        return;
+    }
+    tbody.innerHTML = pacientes.map(p => `
+        <tr style="cursor:pointer" onclick="verPaciente(${p.id})">
+            <td><small class="text-muted">#${p.id_paciente}</small></td>
+            <td><strong>${p.nombres} ${p.apellidos}</strong></td>
+            <td>${p.edad} / ${p.sexo === 'M' ? '<i class="bi bi-gender-male text-primary"></i>' : '<i class="bi bi-gender-female text-danger"></i>'}</td>
+            <td>
+                <span class="badge ${imcColor(p.imc_clasificacion)}">${(p.imc || 0).toFixed(1)}</span>
+                <br><small class="text-muted">${p.imc_clasificacion || '—'}</small>
+            </td>
+            <td>${p.presion_sistolica || '—'}</td>
+            <td>${p.glucosa ? p.glucosa.toFixed(1) : '—'}</td>
+            <td>${p.saturacion_oxigeno ? p.saturacion_oxigeno.toFixed(1) + '%' : '—'}</td>
+            <td><small>${p.diagnostico_preliminar}</small></td>
+            <td>${riskBadge(p.riesgo_enfermedad)}</td>
+            <td>
+                ${p.es_critico ? '<i class="bi bi-exclamation-triangle-fill text-danger me-1" title="Crítico"></i>' : ''}
+                ${p.es_hipertenso ? '<i class="bi bi-droplet-fill text-warning me-1" title="Hipertenso"></i>' : ''}
+                ${p.es_diabetico ? '<i class="bi bi-capsule text-purple me-1" title="Diabético"></i>' : ''}
+            </td>
+        </tr>`).join('');
+}
+
+function imcColor(cls) {
+    const m = { 'Bajo peso': 'bg-info text-dark', 'Normal': 'bg-success', 'Sobrepeso': 'bg-warning text-dark', 'Obesidad': 'bg-danger' };
+    return m[cls] || 'bg-secondary';
+}
+
+function renderPaginacion(total) {
+    const ul = document.getElementById('paginacion');
+    const pages = Math.ceil(total / 50);
+    if (pages <= 1) { ul.innerHTML = ''; return; }
+    let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadPacientes(${currentPage-1})">«</a></li>`;
+    for (let i = Math.max(1, currentPage-2); i <= Math.min(pages, currentPage+2); i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+            <a class="page-link" href="#" onclick="loadPacientes(${i})">${i}</a></li>`;
+    }
+    html += `<li class="page-item ${currentPage === pages ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadPacientes(${currentPage+1})">»</a></li>`;
+    ul.innerHTML = html;
+}
+
+async function verPaciente(id) {
+    const modal = new bootstrap.Modal(document.getElementById('modalPaciente'));
+    document.getElementById('modalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    modal.show();
+    try {
+        const p = await apiCall(`/pacientes/${id}/`);
+        document.getElementById('modalBody').innerHTML = `
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-semibold">Información Personal</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr><td class="text-muted">ID</td><td><strong>#${p.id_paciente}</strong></td></tr>
+                        <tr><td class="text-muted">Nombre</td><td>${p.nombres} ${p.apellidos}</td></tr>
+                        <tr><td class="text-muted">Edad</td><td>${p.edad} años</td></tr>
+                        <tr><td class="text-muted">Sexo</td><td>${p.sexo === 'M' ? 'Masculino' : 'Femenino'}</td></tr>
+                        <tr><td class="text-muted">Fecha consulta</td><td>${p.fecha_consulta}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-semibold">Signos Vitales</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr><td class="text-muted">Peso / Altura</td><td>${p.peso} kg / ${p.altura} m</td></tr>
+                        <tr><td class="text-muted">IMC</td><td>${(p.imc||0).toFixed(2)} (${p.imc_clasificacion})</td></tr>
+                        <tr><td class="text-muted">Presión arterial</td><td>${p.presion_sistolica}/${p.presion_diastolica} mmHg</td></tr>
+                        <tr><td class="text-muted">Glucosa</td><td>${(p.glucosa||0).toFixed(1)} mg/dL</td></tr>
+                        <tr><td class="text-muted">Colesterol</td><td>${(p.colesterol||0).toFixed(1)} mg/dL</td></tr>
+                        <tr><td class="text-muted">Saturación O₂</td><td>${(p.saturacion_oxigeno||0).toFixed(1)}%</td></tr>
+                        <tr><td class="text-muted">Temperatura</td><td>${(p.temperatura||0).toFixed(1)}°C</td></tr>
+                        <tr><td class="text-muted">Frec. cardiaca</td><td>${p.frecuencia_cardiaca} lpm</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-semibold">Factores de Riesgo</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        ${p.fumador ? '<span class="badge bg-danger">Fumador</span>' : ''}
+                        ${p.consumo_alcohol ? '<span class="badge bg-warning text-dark">Alcohol</span>' : ''}
+                        ${p.antecedentes_familiares ? '<span class="badge bg-purple" style="background:#6f42c1">Ant. Familiares</span>' : ''}
+                        <span class="badge bg-info text-dark">Act. ${p.actividad_fisica}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-semibold">Diagnóstico</h6>
+                    <p class="mb-1">${p.diagnostico_preliminar}</p>
+                    <div>${riskBadge(p.riesgo_enfermedad)}</div>
+                    <div class="mt-2">
+                        ${p.es_critico ? '<span class="badge bg-danger me-1"><i class="bi bi-exclamation-triangle me-1"></i>CRÍTICO</span>' : ''}
+                        ${p.es_hipertenso ? '<span class="badge bg-warning text-dark me-1">Hipertenso</span>' : ''}
+                        ${p.es_diabetico ? '<span class="badge bg-purple me-1" style="background:#6f42c1">Diabético</span>' : ''}
+                    </div>
+                </div>
+            </div>`;
+    } catch (err) {
+        document.getElementById('modalBody').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+    }
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterRiesgo').value = '';
+    document.getElementById('filterSexo').value = '';
+    document.getElementById('filterCritico').value = '';
+    loadPacientes();
+}
+
+// Buscar con debounce
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadPacientes(), 400);
+});
+
+loadPacientes();
+</script>
+{% endblock %}

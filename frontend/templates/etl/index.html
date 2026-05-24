@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% block title %}ETL - HealthAnalytics IPS{% endblock %}
+{% block page_title %}Proceso ETL{% endblock %}
+{% block nav_etl %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Panel izquierdo - Acciones -->
+    <div class="col-lg-4">
+        <!-- ETL Dataset Base -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="bi bi-play-circle me-2"></i>Ejecutar ETL - Dataset Base</h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">
+                    Procesa el dataset clínico de 1800 registros incluido en el sistema. 
+                    Ejecuta Extract → Transform → Load completo.
+                </p>
+                <div class="d-grid">
+                    <button class="btn btn-primary" id="btnRunEtl" onclick="runEtlBase()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar ETL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subida CSV/Excel -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-upload me-2"></i>Subir Dataset CSV/Excel</h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">
+                    Sube un archivo CSV o Excel con datos clínicos y ejecuta ETL automáticamente.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Seleccionar archivo</label>
+                    <input type="file" class="form-control" id="fileInput" accept=".csv,.xlsx,.xls">
+                    <div class="form-text">Formatos: CSV, Excel (.xlsx, .xls) • Máx. 50MB</div>
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-success" id="btnUpload" onclick="uploadAndRun()">
+                        <i class="bi bi-cloud-upload me-2"></i>Subir y Ejecutar ETL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info pasos ETL -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-2 text-primary"></i>Pipeline ETL</h6>
+            </div>
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center gap-2 p-2 rounded mb-1" style="background:#e7f0ff">
+                    <i class="bi bi-download text-primary"></i>
+                    <div><strong class="small">EXTRACT</strong><br><small class="text-muted">Lee y registra la fuente de datos</small></div>
+                </div>
+                <div class="text-center text-muted small">↓</div>
+                <div class="d-flex align-items-center gap-2 p-2 rounded mb-1" style="background:#fff3e0">
+                    <i class="bi bi-tools text-warning"></i>
+                    <div><strong class="small">TRANSFORM</strong><br><small class="text-muted">Limpia, normaliza y clasifica</small></div>
+                </div>
+                <div class="text-center text-muted small">↓</div>
+                <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:#e8f5e9">
+                    <i class="bi bi-database-fill text-success"></i>
+                    <div><strong class="small">LOAD</strong><br><small class="text-muted">Inserta datos limpios en MySQL</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel derecho - Resultados y logs -->
+    <div class="col-lg-8">
+        <!-- Resultado ETL -->
+        <div class="card border-0 shadow-sm mb-3" id="resultCard" style="display:none">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold">Resultado del Proceso</h6>
+                <span id="resultBadge" class="badge">—</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3" id="resultStats"></div>
+                <h6 class="small fw-semibold text-muted">LOG DE EJECUCIÓN</h6>
+                <pre id="etlLog" class="bg-dark text-success p-3 rounded small" style="max-height:300px;overflow-y:auto;font-family:monospace;font-size:.75rem"></pre>
+            </div>
+        </div>
+
+        <!-- Progress bar durante ETL -->
+        <div class="card border-0 shadow-sm mb-3" id="progressCard" style="display:none">
+            <div class="card-body py-4 text-center">
+                <div class="spinner-border text-primary mb-3"></div>
+                <h6 class="fw-semibold" id="progressMsg">Ejecutando proceso ETL...</h6>
+                <div class="progress mt-3" style="height:8px">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary w-100"></div>
+                </div>
+                <small class="text-muted mt-2 d-block" id="progressStep">Iniciando...</small>
+            </div>
+        </div>
+
+        <!-- Historial ETL -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-clock-history me-2"></i>Historial ETL</h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadHistory()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th><th>Fecha</th><th>Usuario</th><th>Fuente</th>
+                            <th>Extraídos</th><th>Cargados</th><th>Tiempo</th><th>Estado</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial">
+                        <tr><td colspan="9" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle ETL -->
+<div class="modal fade" id="modalEtlDetalle" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Detalle ETL</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="etlDetalleBody">Cargando...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const STEPS = ['Leyendo archivo...', 'Eliminando duplicados...', 'Convirtiendo tipos...', 'Validando rangos...', 'Tratando nulos...', 'Normalizando...', 'Calculando IMC...', 'Clasificando riesgo...', 'Cargando a MySQL...'];
+let stepIdx = 0;
+
+function startStepAnimation() {
+    stepIdx = 0;
+    const el = document.getElementById('progressStep');
+    return setInterval(() => {
+        el.textContent = STEPS[stepIdx % STEPS.length];
+        stepIdx++;
+    }, 1200);
+}
+
+async function runEtlBase() {
+    const btn = document.getElementById('btnRunEtl');
+    btn.disabled = true;
+    document.getElementById('progressCard').style.display = 'block';
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('progressMsg').textContent = 'Ejecutando ETL con dataset base...';
+    const interval = startStepAnimation();
+
+    try {
+        const res = await apiCall('/etl/run/', 'POST');
+        clearInterval(interval);
+        document.getElementById('progressCard').style.display = 'none';
+        showResult(res);
+        loadHistory();
+        showToast('ETL completado exitosamente', 'success');
+    } catch (err) {
+        clearInterval(interval);
+        document.getElementById('progressCard').style.display = 'none';
+        showToast('Error en ETL: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function uploadAndRun() {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length) {
+        showToast('Seleccione un archivo primero', 'warning');
+        return;
+    }
+    const btn = document.getElementById('btnUpload');
+    btn.disabled = true;
+    document.getElementById('progressCard').style.display = 'block';
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('progressMsg').textContent = `Procesando: ${fileInput.files[0].name}`;
+    const interval = startStepAnimation();
+
+    const formData = new FormData();
+    formData.append('archivo', fileInput.files[0]);
+
+    try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/etl/upload/', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        const data = await res.json();
+        clearInterval(interval);
+        document.getElementById('progressCard').style.display = 'none';
+        if (res.ok) {
+            showResult(data);
+            loadHistory();
+            showToast('ETL completado', 'success');
+        } else {
+            showToast('Error: ' + (data.error || 'Error desconocido'), 'danger');
+        }
+    } catch (err) {
+        clearInterval(interval);
+        document.getElementById('progressCard').style.display = 'none';
+        showToast('Error: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function showResult(data) {
+    const card = document.getElementById('resultCard');
+    card.style.display = 'block';
+
+    const badge = document.getElementById('resultBadge');
+    const isOk = data.status === 'COMPLETADO';
+    badge.textContent = data.status;
+    badge.className = `badge bg-${isOk ? 'success' : 'danger'}`;
+
+    const stats = [
+        { label: 'Extraídos', val: data.registros_extraidos || 0, color: 'primary', icon: 'download' },
+        { label: 'Duplicados', val: data.registros_duplicados || 0, color: 'warning', icon: 'copy' },
+        { label: 'Inválidos', val: data.registros_invalidos || 0, color: 'danger', icon: 'x-circle' },
+        { label: 'Cargados', val: data.registros_cargados || 0, color: 'success', icon: 'check-circle' },
+        { label: 'Nulos tratados', val: data.registros_nulos_tratados || 0, color: 'info', icon: 'bandaid' },
+        { label: 'Tiempo (s)', val: (data.tiempo_ejecucion || 0).toFixed(2), color: 'secondary', icon: 'stopwatch' },
+    ];
+
+    document.getElementById('resultStats').innerHTML = stats.map(s => `
+        <div class="col-md-4 col-6">
+            <div class="d-flex align-items-center gap-2 p-2 rounded border">
+                <i class="bi bi-${s.icon} text-${s.color} fs-5"></i>
+                <div><div class="fw-bold">${s.val}</div><div class="small text-muted">${s.label}</div></div>
+            </div>
+        </div>`).join('');
+
+    document.getElementById('etlLog').textContent = data.log || data.error || 'Sin log';
+    card.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function loadHistory() {
+    try {
+        const data = await apiCall('/etl/historial/');
+        const tbody = document.getElementById('tablaHistorial');
+        const stateColors = { COMPLETADO: 'success', ERROR: 'danger', EN_PROCESO: 'warning', PENDIENTE: 'secondary' };
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-muted">Sin historial</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(e => {
+            const fecha = new Date(e.fecha_inicio).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+            const color = stateColors[e.estado] || 'secondary';
+            return `<tr>
+                <td><small class="text-muted">#${e.id}</small></td>
+                <td><small>${fecha}</small></td>
+                <td><small>${e.usuario_nombre || '—'}</small></td>
+                <td><small>${e.fuente}</small></td>
+                <td>${e.registros_extraidos}</td>
+                <td><strong>${e.registros_cargados}</strong></td>
+                <td>${(e.tiempo_ejecucion || 0).toFixed(1)}s</td>
+                <td><span class="badge bg-${color}">${e.estado}</span></td>
+                <td><button class="btn btn-xs btn-outline-secondary btn-sm py-0" onclick="verDetalle(${e.id})">
+                    <i class="bi bi-eye"></i></button></td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        showToast('Error cargando historial', 'danger');
+    }
+}
+
+async function verDetalle(id) {
+    const modal = new bootstrap.Modal(document.getElementById('modalEtlDetalle'));
+    document.getElementById('etlDetalleBody').innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    modal.show();
+    try {
+        const d = await apiCall(`/etl/historial/${id}/`);
+        document.getElementById('etlDetalleBody').innerHTML = `
+            <div class="row g-3 mb-3">
+                <div class="col-md-3"><strong>Fuente:</strong> ${d.fuente}</div>
+                <div class="col-md-3"><strong>Estado:</strong> <span class="badge bg-${d.estado==='COMPLETADO'?'success':'danger'}">${d.estado}</span></div>
+                <div class="col-md-3"><strong>Extraídos:</strong> ${d.registros_extraidos}</div>
+                <div class="col-md-3"><strong>Cargados:</strong> ${d.registros_cargados}</div>
+            </div>
+            <h6 class="small fw-semibold text-muted">LOG COMPLETO</h6>
+            <pre class="bg-dark text-success p-3 rounded small" style="max-height:400px;overflow-y:auto;font-size:.72rem">${d.log_detalle || 'Sin log'}</pre>
+            ${d.mensaje_error ? `<div class="alert alert-danger mt-2"><strong>Error:</strong> ${d.mensaje_error}</div>` : ''}`;
+    } catch (err) {
+        document.getElementById('etlDetalleBody').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+    }
+}
+
+loadHistory();
+</script>
+{% endblock %}

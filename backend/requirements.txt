@@ -1,0 +1,31 @@
+# ============================================================
+# HealthAnalytics IPS — requirements.txt para Python 3.14
+# ============================================================
+
+# --- Django & REST Framework ---
+Django==5.2.2
+djangorestframework==3.17.1
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+drf-yasg==1.21.15
+
+# --- Base de datos (PyMySQL = puro Python, sin compilar) ---
+PyMySQL==1.2.0
+
+# --- Ciencia de datos (compatibles con Python 3.14) ---
+pandas==3.0.3
+numpy==2.4.6
+scikit-learn==1.8.0
+scipy==1.17.1
+joblib==1.5.3
+
+# --- Procesamiento de archivos ---
+openpyxl==3.1.5
+xlsxwriter==3.2.9
+Pillow==12.2.0
+
+# --- Exportación de reportes ---
+reportlab==4.5.1
+
+# --- Configuración ---
+python-dotenv==1.2.2

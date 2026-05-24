@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - HealthAnalytics IPS{% endblock %}
+{% block page_title %}Dashboard Principal{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .kpi-label { font-size: .8rem; color: #6c757d; margin-top: .25rem; }
+    .chart-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); padding: 1.25rem; }
+    .etl-badge { padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- KPI CARDS -->
+<div class="row g-3 mb-4" id="kpiRow">
+    <!-- Filled by JS -->
+    <div class="col-12 text-center py-5" id="kpiLoading">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2 text-muted">Cargando indicadores...</p>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-5">
+        <div class="chart-card h-100">
+            <h6 class="fw-semibold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribución de Riesgo</h6>
+            <canvas id="chartRiesgo" height="220"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="chart-card h-100">
+            <h6 class="fw-semibold mb-3"><i class="bi bi-bar-chart me-2 text-primary"></i>Riesgo por Grupo de Edad</h6>
+            <canvas id="chartEdad" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="chart-card h-100">
+            <h6 class="fw-semibold mb-3"><i class="bi bi-gender-ambiguous me-2 text-primary"></i>Distribución por Sexo</h6>
+            <canvas id="chartSexo" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-card h-100">
+            <h6 class="fw-semibold mb-3"><i class="bi bi-activity me-2 text-primary"></i>Distribución por IMC</h6>
+            <canvas id="chartImc" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-semibold mb-0"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Pacientes Críticos</h6>
+                <a href="/pacientes/?critico=true" class="btn btn-sm btn-outline-danger">Ver todos</a>
+            </div>
+            <div id="tablaCriticos" class="table-responsive" style="max-height:300px;overflow-y:auto">
+                <div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Cargando...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-semibold mb-0"><i class="bi bi-clock-history me-2 text-success"></i>Últimos Procesos ETL</h6>
+                <a href="/etl/" class="btn btn-sm btn-outline-success">Ejecutar ETL</a>
+            </div>
+            <div id="tablaEtl">
+                <div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Cargando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const RISK_COLORS = {
+    'Bajo': '#198754', 'Medio': '#ffc107', 'Alto': '#fd7e14', 'Crítico': '#dc3545'
+};
+let chartRiesgo, chartEdad, chartSexo, chartImc;
+
+async function loadDashboard() {
+    try {
+        const [kpis, edadData, sexoData, imcData, criticos, etlHist] = await Promise.all([
+            apiCall('/dashboard/kpis/'),
+            apiCall('/analytics/tendencia-edad/'),
+            apiCall('/analytics/segmentacion/sexo/'),
+            apiCall('/analytics/segmentacion/imc/'),
+            apiCall('/analytics/pacientes-criticos/'),
+            apiCall('/etl/historial/'),
+        ]);
+
+        renderKPIs(kpis);
+        renderChartRiesgo(kpis.distribucion_riesgo || {});
+        renderChartEdad(edadData || []);
+        renderChartSexo(sexoData || []);
+        renderChartImc(imcData || []);
+        renderCriticos(criticos);
+        renderEtlHistory(etlHist);
+    } catch (err) {
+        showToast('Error cargando dashboard: ' + err.message, 'danger');
+    }
+}
+
+function renderKPIs(d) {
+    document.getElementById('kpiLoading').remove();
+    const kpis = [
+        { label: 'Total Pacientes', value: d.total_pacientes || 0, icon: 'people-fill', color: '#0d6efd', bg: '#e7f0ff' },
+        { label: 'Pacientes Críticos', value: d.pacientes_criticos || 0, icon: 'heart-pulse-fill', color: '#dc3545', bg: '#fde8ea' },
+        { label: 'Hipertensos', value: d.pacientes_hipertensos || 0, icon: 'droplet-fill', color: '#fd7e14', bg: '#fff3e0' },
+        { label: 'Diabéticos', value: d.pacientes_diabeticos || 0, icon: 'capsule', color: '#6f42c1', bg: '#f0ebff' },
+        { label: 'Fumadores', value: d.pacientes_fumadores || 0, icon: 'wind', color: '#0dcaf0', bg: '#e0f7fa' },
+        { label: 'Promedio IMC', value: d.promedio_imc || 0, icon: 'person-fill', color: '#198754', bg: '#e8f5e9' },
+    ];
+    const row = document.getElementById('kpiRow');
+    kpis.forEach(k => {
+        const col = document.createElement('div');
+        col.className = 'col-xl-2 col-lg-4 col-md-4 col-6';
+        col.innerHTML = `
+            <div class="kpi-card card p-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div>
+                        <div class="kpi-value" style="color:${k.color}">${k.value.toLocaleString('es-CO')}</div>
+                        <div class="kpi-label">${k.label}</div>
+                    </div>
+                    <div class="kpi-icon" style="background:${k.bg}">
+                        <i class="bi bi-${k.icon}" style="color:${k.color}"></i>
+                    </div>
+                </div>
+            </div>`;
+        row.appendChild(col);
+    });
+}
+
+function renderChartRiesgo(dist) {
+    const labels = Object.keys(dist);
+    const values = Object.values(dist);
+    if (chartRiesgo) chartRiesgo.destroy();
+    chartRiesgo = new Chart(document.getElementById('chartRiesgo'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: labels.map(l => RISK_COLORS[l] || '#adb5bd'), borderWidth: 3 }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+    });
+}
+
+function renderChartEdad(data) {
+    if (chartEdad) chartEdad.destroy();
+    chartEdad = new Chart(document.getElementById('chartEdad'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.grupo_edad),
+            datasets: [
+                { label: 'Bajo', data: data.map(d => d.bajo), backgroundColor: '#198754' },
+                { label: 'Medio', data: data.map(d => d.medio), backgroundColor: '#ffc107' },
+                { label: 'Alto', data: data.map(d => d.alto), backgroundColor: '#fd7e14' },
+                { label: 'Crítico', data: data.map(d => d.critico), backgroundColor: '#dc3545' },
+            ]
+        },
+        options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+function renderChartSexo(data) {
+    if (chartSexo) chartSexo.destroy();
+    const labels = data.map(d => d.sexo === 'M' ? 'Masculino' : 'Femenino');
+    chartSexo = new Chart(document.getElementById('chartSexo'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Total', data: data.map(d => d.total), backgroundColor: ['#0d6efd', '#e91e8c'] },
+                { label: 'Críticos', data: data.map(d => d.criticos), backgroundColor: ['#dc3545', '#ff6b9d'] },
+            ]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+function renderChartImc(data) {
+    if (chartImc) chartImc.destroy();
+    const colors = { 'Bajo peso': '#0dcaf0', 'Normal': '#198754', 'Sobrepeso': '#ffc107', 'Obesidad': '#dc3545' };
+    chartImc = new Chart(document.getElementById('chartImc'), {
+        type: 'pie',
+        data: {
+            labels: data.map(d => d.imc_clasificacion),
+            datasets: [{ data: data.map(d => d.total), backgroundColor: data.map(d => colors[d.imc_clasificacion] || '#adb5bd') }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+function renderCriticos(data) {
+    const container = document.getElementById('tablaCriticos');
+    if (!data || !data.pacientes || data.pacientes.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3">No hay pacientes críticos</p>';
+        return;
+    }
+    let html = `<table class="table table-sm table-hover mb-0">
+        <thead class="table-light"><tr>
+            <th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th>
+        </tr></thead><tbody>`;
+    data.pacientes.slice(0, 8).forEach(p => {
+        html += `<tr>
+            <td><strong>${p.nombres} ${p.apellidos}</strong><br><small class="text-muted">${p.edad} años</small></td>
+            <td><span class="badge ${p.presion_sistolica > 180 ? 'bg-danger' : 'bg-warning text-dark'}">${p.presion_sistolica}</span></td>
+            <td><span class="badge ${p.glucosa > 300 ? 'bg-danger' : 'bg-secondary'}">${p.glucosa?.toFixed(1)}</span></td>
+            <td><span class="badge ${p.saturacion_oxigeno < 85 ? 'bg-danger' : 'bg-success'}">${p.saturacion_oxigeno?.toFixed(1)}%</span></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function renderEtlHistory(data) {
+    const container = document.getElementById('tablaEtl');
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted py-3">Sin procesos ETL ejecutados</p>';
+        return;
+    }
+    const stateColors = { 'COMPLETADO': 'success', 'ERROR': 'danger', 'EN_PROCESO': 'warning', 'PENDIENTE': 'secondary' };
+    let html = `<table class="table table-sm mb-0"><thead class="table-light"><tr>
+        <th>Fecha</th><th>Fuente</th><th>Registros</th><th>Estado</th>
+    </tr></thead><tbody>`;
+    data.slice(0, 6).forEach(e => {
+        const fecha = new Date(e.fecha_inicio).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+        const color = stateColors[e.estado] || 'secondary';
+        html += `<tr>
+            <td><small>${fecha}</small></td>
+            <td><small>${e.fuente}</small></td>
+            <td><strong>${e.registros_cargados}</strong></td>
+            <td><span class="badge bg-${color}">${e.estado}</span></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+loadDashboard();
+</script>
+{% endblock %}

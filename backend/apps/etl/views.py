@@ -1,0 +1,149 @@
+"""
+ETL Views - Ejecución ETL, subida CSV, gestión de pacientes
+"""
+
+import os
+import tempfile
+from django.conf import settings
+from django.utils import timezone
+from rest_framework import status, generics, filters
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from apps.authentication.permissions import IsAdminOrAnalista, IsAdministrador
+from .models import Paciente, ETLHistory
+from .serializers import PacienteSerializer, PacienteListSerializer, ETLHistorySerializer
+from .services import ETLService
+
+
+# ─── PACIENTES ──────────────────────────────────────────────────────────────────
+
+class PacienteListView(generics.ListAPIView):
+    """Listado de pacientes con filtros y búsqueda"""
+    serializer_class = PacienteListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombres', 'apellidos', 'diagnostico_preliminar', 'riesgo_enfermedad']
+    ordering_fields = ['edad', 'imc', 'glucosa', 'presion_sistolica', 'fecha_consulta']
+    ordering = ['-fecha_registro']
+
+    def get_queryset(self):
+        qs = Paciente.objects.all()
+        # Filtros opcionales por query param
+        riesgo = self.request.query_params.get('riesgo')
+        sexo = self.request.query_params.get('sexo')
+        critico = self.request.query_params.get('critico')
+        diagnostico = self.request.query_params.get('diagnostico')
+
+        if riesgo:
+            qs = qs.filter(riesgo_enfermedad=riesgo)
+        if sexo:
+            qs = qs.filter(sexo=sexo.upper())
+        if critico in ['true', '1']:
+            qs = qs.filter(es_critico=True)
+        if diagnostico:
+            qs = qs.filter(diagnostico_preliminar__icontains=diagnostico)
+        return qs
+
+
+class PacienteDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Detalle completo de un paciente"""
+    serializer_class = PacienteSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Paciente.objects.all()
+
+
+# ─── ETL ─────────────────────────────────────────────────────────────────────────
+
+@api_view(['POST'])
+@permission_classes([IsAdminOrAnalista])
+def run_etl_base_dataset(request):
+    """
+    Ejecuta ETL sobre el dataset base (Excel incluido en el proyecto)
+    """
+    base_path = os.path.join(settings.DATASETS_DIR, 'dataset_clinico_etl_1800_registros.xlsx')
+    if not os.path.exists(base_path):
+        return Response(
+            {'error': 'Dataset base no encontrado. Coloca el archivo en /datasets/'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    etl_record = ETLHistory.objects.create(
+        usuario=request.user,
+        fuente='DATASET_BASE',
+        archivo_fuente='dataset_clinico_etl_1800_registros.xlsx',
+        estado='EN_PROCESO',
+    )
+
+    service = ETLService()
+    result = service.run(base_path, source_type='DATASET_BASE', etl_record=etl_record)
+    etl_record.refresh_from_db()
+
+    return Response({
+        'etl_id': etl_record.id,
+        **result
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminOrAnalista])
+@parser_classes([MultiPartParser, FormParser])
+def upload_and_run_etl(request):
+    """
+    Sube un archivo CSV/Excel y ejecuta ETL automáticamente
+    """
+    archivo = request.FILES.get('archivo')
+    if not archivo:
+        return Response({'error': 'No se proporcionó archivo'}, status=status.HTTP_400_BAD_REQUEST)
+
+    ext = os.path.splitext(archivo.name)[1].lower()
+    if ext not in ['.csv', '.xlsx', '.xls']:
+        return Response(
+            {'error': 'Formato no soportado. Use CSV o Excel (.xlsx/.xls)'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Guardar archivo temporalmente
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        for chunk in archivo.chunks():
+            tmp.write(chunk)
+        tmp_path = tmp.name
+
+    etl_record = ETLHistory.objects.create(
+        usuario=request.user,
+        fuente='CSV_UPLOAD' if ext == '.csv' else 'EXCEL_UPLOAD',
+        archivo_fuente=archivo.name,
+        estado='EN_PROCESO',
+    )
+
+    try:
+        service = ETLService()
+        result = service.run(tmp_path, etl_record=etl_record)
+    finally:
+        os.unlink(tmp_path)
+
+    etl_record.refresh_from_db()
+    return Response({'etl_id': etl_record.id, **result}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def etl_history_list(request):
+    """Historial de procesos ETL"""
+    records = ETLHistory.objects.all().order_by('-fecha_inicio')[:50]
+    serializer = ETLHistorySerializer(records, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def etl_history_detail(request, pk):
+    """Detalle de un proceso ETL con log completo"""
+    try:
+        record = ETLHistory.objects.get(pk=pk)
+    except ETLHistory.DoesNotExist:
+        return Response({'error': 'No encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = ETLHistorySerializer(record)
+    return Response(serializer.data)
