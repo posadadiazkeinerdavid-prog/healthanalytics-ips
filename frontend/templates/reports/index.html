@@ -26,9 +26,9 @@
                         <div class="small text-muted">KPIs, distribuciones, ETL y ML</div>
                     </div>
                 </div>
-                <a href="/api/reportes/pdf/" class="btn btn-danger w-100" target="_blank">
+                <button class="btn btn-danger w-100" onclick="descargarReporte('pdf')">
                     <i class="bi bi-download me-2"></i>Descargar PDF
-                </a>
+                </button>
             </div>
         </div>
 
@@ -44,9 +44,9 @@
                         <div class="small text-muted">Pacientes + KPIs en hojas separadas</div>
                     </div>
                 </div>
-                <a href="/api/reportes/excel/" class="btn btn-success w-100" target="_blank">
+                <button class="btn btn-success w-100" onclick="descargarReporte('excel')">
                     <i class="bi bi-download me-2"></i>Descargar Excel
-                </a>
+                </button>
             </div>
         </div>
 
@@ -62,9 +62,9 @@
                         <div class="small text-muted">Todos los pacientes procesados</div>
                     </div>
                 </div>
-                <a href="/api/reportes/csv/" class="btn btn-primary w-100">
+                <button class="btn btn-primary w-100" onclick="descargarReporte('csv')">
                     <i class="bi bi-download me-2"></i>Descargar CSV
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@
 
         <!-- Modelos ML -->
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-cpu me-2 text-purple" style="color:#6f42c1"></i>Modelos Machine Learning Entrenados</div>
+            <div class="card-header bg-white fw-semibold"><i class="bi bi-cpu me-2" style="color:#6f42c1"></i>Modelos Machine Learning Entrenados</div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
                     <thead class="table-light">
@@ -105,6 +105,31 @@
 
 {% block extra_js %}
 <script>
+async function descargarReporte(tipo) {
+    const extensiones = { pdf: 'pdf', excel: 'xlsx', csv: 'csv' };
+    const token = localStorage.getItem('access_token');
+    if (!token) { showToast('Sesión expirada, inicia sesión de nuevo', 'danger'); return; }
+    try {
+        showToast(`Generando ${tipo.toUpperCase()}...`, 'info');
+        const resp = await fetch(`/api/reportes/${tipo}/`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resp.ok) { showToast('Error al generar el reporte', 'danger'); return; }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_healthanalytics.${extensiones[tipo]}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`${tipo.toUpperCase()} descargado correctamente`, 'success');
+    } catch(e) {
+        showToast('Error de conexión: ' + e.message, 'danger');
+    }
+}
+
 async function loadReports() {
     try {
         const [summary, etlHist, mlHist] = await Promise.all([
@@ -113,7 +138,6 @@ async function loadReports() {
             apiCall('/ml/historial/'),
         ]);
 
-        // Summary
         const su = document.getElementById('summaryBody');
         const last = summary.ultimo_etl;
         su.innerHTML = `
@@ -134,7 +158,6 @@ async function loadReports() {
                 <span class="badge bg-${last.estado==='COMPLETADO'?'success':'danger'}">${last.estado}</span>
             </div>` : ''}`;
 
-        // ETL history table
         const stateColors = { COMPLETADO: 'success', ERROR: 'danger', EN_PROCESO: 'warning', PENDIENTE: 'secondary' };
         const etlTbody = document.getElementById('tablaEtlReporte');
         if (!etlHist.length) {
@@ -156,7 +179,6 @@ async function loadReports() {
             }).join('');
         }
 
-        // ML history table
         const mlTbody = document.getElementById('tablaMlReporte');
         if (!mlHist.length) {
             mlTbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">Sin modelos entrenados</td></tr>';
