@@ -1,0 +1,234 @@
+/* HealthAnalytics IPS - Custom Styles */
+
+/* ── CHART CONTAINERS ───────────────────────────────── */
+.chart-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    padding: 1.25rem;
+    border: 1px solid #DFE1E6;
+}
+
+.chart-card h6 {
+    font-size: .88rem;
+    font-weight: 600;
+    color: #172B4D;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+/* ── RISK BADGES ────────────────────────────────────── */
+.badge-bajo    { background: #E3FCF0; color: #00875A; font-weight: 600; border-radius: 6px; padding: .3rem .7rem; }
+.badge-medio   { background: #FFF7E6; color: #974F0C; font-weight: 600; border-radius: 6px; padding: .3rem .7rem; }
+.badge-alto    { background: #FFF0E5; color: #BF2600; font-weight: 600; border-radius: 6px; padding: .3rem .7rem; }
+.badge-critico { background: #FFEBE6; color: #BF2600; font-weight: 600; border-radius: 6px; padding: .3rem .7rem; animation: blink 1.5s infinite; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .6; }
+}
+
+/* ── KPI CARDS ──────────────────────────────────────── */
+.kpi-card {
+    border: 1px solid #DFE1E6;
+    border-radius: 12px;
+    background: #fff;
+    padding: 1.2rem 1.25rem;
+    transition: transform .2s ease, box-shadow .2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--kpi-color, #0066CC);
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.kpi-label {
+    font-size: .75rem;
+    color: #6B778C;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: .25rem;
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+/* ── ETL STATUS BADGES ──────────────────────────────── */
+.etl-badge-completado { background: #E3FCF0; color: #00875A; padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+.etl-badge-error      { background: #FFEBE6; color: #BF2600; padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+.etl-badge-proceso    { background: #E6F0FF; color: #0052CC; padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+.etl-badge-pendiente  { background: #F4F5F7; color: #6B778C; padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+
+/* ── ML METRICS ─────────────────────────────────────── */
+.metric-card {
+    background: #fff;
+    border: 1px solid #DFE1E6;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    text-align: center;
+    transition: transform .2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.metric-label {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #6B778C;
+}
+
+/* ── CONFUSION MATRIX ───────────────────────────────── */
+.cm-table td, .cm-table th {
+    text-align: center;
+    font-size: .8rem;
+    min-width: 55px;
+    padding: .5rem;
+}
+
+.cm-cell-high   { background: #FFEBE6; color: #BF2600; font-weight: 700; }
+.cm-cell-medium { background: #FFF7E6; color: #974F0C; }
+.cm-cell-low    { background: #F4F5F7; color: #6B778C; }
+
+/* ── LOG CONSOLE ────────────────────────────────────── */
+.log-console {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 10px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: .78rem;
+    line-height: 1.6;
+    max-height: 320px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.log-console .log-info    { color: #89dceb; }
+.log-console .log-success { color: #a6e3a1; }
+.log-console .log-error   { color: #f38ba8; }
+.log-console .log-warning { color: #fab387; }
+
+/* ── PROGRESS BARS ──────────────────────────────────── */
+.progress {
+    border-radius: 50px;
+    background: #EEF2F7;
+    height: 8px;
+}
+
+.progress-bar { border-radius: 50px; }
+
+/* ── TABLES ─────────────────────────────────────────── */
+.table-clinical thead th {
+    background: #F4F5F7;
+    color: #6B778C;
+    font-weight: 600;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: .75rem 1rem;
+    border-bottom: 2px solid #DFE1E6;
+}
+
+.table-clinical tbody td {
+    padding: .7rem 1rem;
+    vertical-align: middle;
+    font-size: .84rem;
+}
+
+.table-clinical tbody tr:hover {
+    background: #E8F1FB;
+}
+
+/* ── STAT ROWS ───────────────────────────────────────── */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .6rem 0;
+    border-bottom: 1px solid #DFE1E6;
+    font-size: .84rem;
+}
+
+.stat-row:last-child { border-bottom: none; }
+.stat-row .stat-label { color: #6B778C; }
+.stat-row .stat-value { font-weight: 600; }
+
+/* ── FEATURE IMPORTANCE BAR ──────────────────────────── */
+.feature-bar {
+    height: 22px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #0066CC, #00A3E0);
+    transition: width .6s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 600;
+    min-width: 30px;
+}
+
+/* ── UPLOAD ZONE ─────────────────────────────────────── */
+.upload-zone {
+    border: 2px dashed #0066CC;
+    border-radius: 12px;
+    padding: 2.5rem;
+    text-align: center;
+    background: #E8F1FB;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.upload-zone:hover {
+    background: #d0e5f9;
+    border-color: #004999;
+}
+
+.upload-zone i {
+    font-size: 2.5rem;
+    color: #0066CC;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 768px) {
+    .kpi-value { font-size: 1.5rem; }
+    .metric-value { font-size: 1.4rem; }
+}
