@@ -163,18 +163,55 @@ class ETLService:
         return df
 
     def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        col_map = {
-            'presión_sistólica': 'presion_sistolica',
-            'presión_diastólica': 'presion_diastolica',
+        """Normaliza nombres de columnas — acepta tildes, mayúsculas, espacios, guiones"""
+        import unicodedata
+
+        def normalize(s):
+            """Quita tildes, pasa a minúscula, reemplaza espacios/guiones por _"""
+            s = str(s).strip().lower()
+            s = unicodedata.normalize('NFD', s)
+            s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
+            s = re.sub(r'[\s\-]+', '_', s)
+            return s
+
+        # Mapa de nombre normalizado → nombre interno del modelo
+        CANONICAL = {
+            'id_paciente': 'id_paciente',
+            'nombres': 'nombres',
+            'apellidos': 'apellidos',
+            'edad': 'edad',
+            'sexo': 'sexo',
+            'peso': 'peso',
+            'altura': 'altura',
+            'imc': 'imc',
+            'presion_sistolica': 'presion_sistolica',
+            'presion_diastolica': 'presion_diastolica',
             'frecuencia_cardiaca': 'frecuencia_cardiaca',
-            'saturación_oxígeno': 'saturacion_oxigeno',
-            'actividad_física': 'actividad_fisica',
-            'diagnóstico_preliminar': 'diagnostico_preliminar',
-            'riesgo_enfermedad': 'riesgo_enfermedad',
-            'IMC': 'imc',
+            'glucosa': 'glucosa',
+            'colesterol': 'colesterol',
+            'saturacion_oxigeno': 'saturacion_oxigeno',
+            'temperatura': 'temperatura',
             'antecedentes_familiares': 'antecedentes_familiares',
+            'fumador': 'fumador',
+            'consumo_alcohol': 'consumo_alcohol',
+            'actividad_fisica': 'actividad_fisica',
+            'diagnostico_preliminar': 'diagnostico_preliminar',
+            'riesgo_enfermedad': 'riesgo_enfermedad',
+            'fecha_consulta': 'fecha_consulta',
         }
-        df = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
+
+        rename_map = {}
+        for col in df.columns:
+            key = normalize(col)
+            if key in CANONICAL:
+                rename_map[col] = CANONICAL[key]
+
+        df = df.rename(columns=rename_map)
+        found = list(rename_map.values())
+        missing = [c for c in CANONICAL if c not in df.columns]
+        if missing:
+            self._log(f'TRANSFORM: Columnas no encontradas en el archivo: {missing}', 'WARNING')
+        self._log(f'TRANSFORM: Columnas mapeadas: {found}')
         return df
 
     def _remove_duplicates(self, df: pd.DataFrame) -> pd.DataFrame:

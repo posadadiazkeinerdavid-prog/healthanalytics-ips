@@ -31,7 +31,6 @@ class PacienteListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = Paciente.objects.all()
-        # Filtros opcionales por query param
         riesgo = self.request.query_params.get('riesgo')
         sexo = self.request.query_params.get('sexo')
         critico = self.request.query_params.get('critico')
@@ -96,20 +95,37 @@ def upload_and_run_etl(request):
     """
     archivo = request.FILES.get('archivo')
     if not archivo:
-        return Response({'error': 'No se proporcionó archivo'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'error': 'No se proporcionó archivo. Asegúrate de adjuntar el campo "archivo".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validar tamaño (50 MB máx)
+    if archivo.size > 50 * 1024 * 1024:
+        return Response(
+            {'error': 'Archivo demasiado grande. Máximo 50 MB.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     ext = os.path.splitext(archivo.name)[1].lower()
     if ext not in ['.csv', '.xlsx', '.xls']:
         return Response(
-            {'error': 'Formato no soportado. Use CSV o Excel (.xlsx/.xls)'},
+            {'error': f'Formato "{ext}" no soportado. Use CSV o Excel (.xlsx/.xls)'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     # Guardar archivo temporalmente
-    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
-        for chunk in archivo.chunks():
-            tmp.write(chunk)
-        tmp_path = tmp.name
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            for chunk in archivo.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+    except Exception as e:
+        return Response(
+            {'error': f'Error guardando archivo: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
     etl_record = ETLHistory.objects.create(
         usuario=request.user,
@@ -120,9 +136,26 @@ def upload_and_run_etl(request):
 
     try:
         service = ETLService()
-        result = service.run(tmp_path, etl_record=etl_record)
+        result = service.run(
+            tmp_path,
+            source_type='CSV_UPLOAD' if ext == '.csv' else 'EXCEL_UPLOAD',
+            etl_record=etl_record
+        )
+    except Exception as e:
+        # Marcar el registro ETL como ERROR — nunca debe quedar en EN_PROCESO
+        etl_record.estado = 'ERROR'
+        etl_record.mensaje_error = str(e)
+        etl_record.fecha_fin = timezone.now()
+        etl_record.save()
+        return Response({
+            'etl_id': etl_record.id,
+            'status': 'ERROR',
+            'error': str(e),
+            'log': f'Error crítico durante el ETL: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
-        os.unlink(tmp_path)
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
     etl_record.refresh_from_db()
     return Response({'etl_id': etl_record.id, **result}, status=status.HTTP_200_OK)

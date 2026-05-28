@@ -180,37 +180,55 @@ async function uploadAndRun() {
         showToast('Seleccione un archivo primero', 'warning');
         return;
     }
+    const file = fileInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+        showToast('Formato no válido. Solo se aceptan .csv, .xlsx o .xls', 'danger');
+        return;
+    }
     const btn = document.getElementById('btnUpload');
     btn.disabled = true;
     document.getElementById('progressCard').style.display = 'block';
     document.getElementById('resultCard').style.display = 'none';
-    document.getElementById('progressMsg').textContent = `Procesando: ${fileInput.files[0].name}`;
+    document.getElementById('progressMsg').textContent = `Subiendo y procesando: ${file.name}`;
     const interval = startStepAnimation();
 
     const formData = new FormData();
-    formData.append('archivo', fileInput.files[0]);
+    formData.append('archivo', file);
 
     try {
         const token = localStorage.getItem('access_token');
+        if (!token) { window.location.href = '/login/'; return; }
+
         const res = await fetch('/api/etl/upload/', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
+            // NO pongas Content-Type aquí — el navegador lo agrega automático con boundary
             body: formData
         });
-        const data = await res.json();
+
+        let data;
+        try { data = await res.json(); }
+        catch { data = { error: `Error HTTP ${res.status} — respuesta no válida` }; }
+
         clearInterval(interval);
         document.getElementById('progressCard').style.display = 'none';
-        if (res.ok) {
+
+        if (res.ok && data.status === 'COMPLETADO') {
             showResult(data);
             loadHistory();
-            showToast('ETL completado', 'success');
+            fileInput.value = ''; // limpiar el input para permitir subir otro
+            showToast(`ETL completado: ${data.registros_cargados} registros cargados`, 'success');
         } else {
-            showToast('Error: ' + (data.error || 'Error desconocido'), 'danger');
+            const msg = data.error || data.detail || `Error ${res.status}`;
+            showToast('Error en ETL: ' + msg, 'danger');
+            if (data.log) showResult(data); // mostrar log aunque haya error
         }
     } catch (err) {
         clearInterval(interval);
         document.getElementById('progressCard').style.display = 'none';
-        showToast('Error: ' + err.message, 'danger');
+        showToast('Error de conexión: ' + err.message, 'danger');
+        console.error('Upload ETL error:', err);
     } finally {
         btn.disabled = false;
     }
