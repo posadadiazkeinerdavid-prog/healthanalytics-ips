@@ -82,49 +82,36 @@
 
 {% block extra_js %}
 <script>
-const RISK_COLORS = {
-    'Bajo': '#198754', 'Medio': '#ffc107', 'Alto': '#fd7e14', 'Crítico': '#dc3545'
-};
+
+
+
+
+
+
+
+
 let chartRiesgo, chartEdad, chartSexo, chartImc;
 
 async function loadDashboard() {
-    const loadingEl = document.getElementById('kpiLoading');
     try {
-        // Carga KPIs primero — si falla muestra error inmediato
-        const kpis = await apiCall('/dashboard/kpis/');
-        if (!kpis) return; // redirigido a login por token inválido
-
-        // Los demás endpoints nunca rompen el dashboard si fallan individualmente
-        const [edadData, sexoData, imcData, criticos, etlHist] = await Promise.all([
-            apiCall('/analytics/tendencia-edad/').catch(() => []),
-            apiCall('/analytics/segmentacion/sexo/').catch(() => []),
-            apiCall('/analytics/segmentacion/imc/').catch(() => []),
-            apiCall('/analytics/pacientes-criticos/').catch(() => null),
-            apiCall('/etl/historial/').catch(() => []),
+        const [kpis, edadData, sexoData, imcData, criticos, etlHist] = await Promise.all([
+            apiCall('/dashboard/kpis/'),
+            apiCall('/analytics/tendencia-edad/'),
+            apiCall('/analytics/segmentacion/sexo/'),
+            apiCall('/analytics/segmentacion/imc/'),
+            apiCall('/analytics/pacientes-criticos/'),
+            apiCall('/etl/historial/'),
         ]);
 
-        renderKPIs(kpis);   // esto remueve el spinner
+        renderKPIs(kpis);
         renderChartRiesgo(kpis.distribucion_riesgo || {});
-        renderChartEdad(Array.isArray(edadData) ? edadData : []);
-        renderChartSexo(Array.isArray(sexoData) ? sexoData : []);
-        renderChartImc(Array.isArray(imcData) ? imcData : []);
+        renderChartEdad(edadData || []);
+        renderChartSexo(sexoData || []);
+        renderChartImc(imcData || []);
         renderCriticos(criticos);
-        renderEtlHistory(Array.isArray(etlHist) ? etlHist : []);
-
-        if (kpis.total_pacientes === 0) {
-            showToast('No hay datos aún. Ve a "Proceso ETL" y ejecuta el ETL primero.', 'warning');
-        }
+        renderEtlHistory(etlHist);
     } catch (err) {
-        if (loadingEl) {
-            loadingEl.innerHTML = `
-                <div class="alert alert-warning d-inline-block text-start">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>No se pudieron cargar los indicadores.</strong><br>
-                    <small class="text-muted">${err.message}</small><br><br>
-                    <small>¿Ejecutaste el proceso ETL? Ve al menú <strong>Proceso ETL</strong> → Ejecutar ETL primero.</small>
-                </div>`;
-        }
-        console.error('Dashboard error:', err);
+        showToast('Error cargando dashboard: ' + err.message, 'danger');
     }
 }
 
