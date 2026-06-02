@@ -1,0 +1,33 @@
+# Variables de entorno
+.env
+
+# Entornos virtuales
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+logs/
+*.log
+
+# Modelos Machine Learning
+ml_models/
+*.joblib
+*.pkl
+
+# VS Code
+.vscode/
+
+# Archivos estáticos generados
+staticfiles/
+
+# Bases de datos locales
+db.sqlite3
+
+# Archivos temporales
+*.tmp
+*.temp
