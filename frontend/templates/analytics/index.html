@@ -10,6 +10,7 @@
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabEstadisticas"><i class="bi bi-calculator me-1"></i>Estadística Descriptiva</a></li>
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSegmentacion"><i class="bi bi-diagram-3 me-1"></i>Segmentación</a></li>
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabCriticos"><i class="bi bi-exclamation-triangle me-1"></i>Pacientes Críticos</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabHeatmap"><i class="bi bi-grid-3x3 me-1"></i>Heatmap Correlación</a></li>
 </ul>
 
 <div class="tab-content">
@@ -113,6 +114,40 @@
             </div>
         </div>
     </div>
+
+    <!-- HEATMAP TAB -->
+    <div class="tab-pane fade" id="tabHeatmap">
+        <div class="card border-0 shadow-sm p-3 mb-3" style="background:linear-gradient(135deg,#f0f4ff,#e8f0fe)">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-grid-3x3-gap-fill text-primary fs-2"></i>
+                <div>
+                    <h5 class="fw-bold mb-1">Heatmap de Correlación Clínica</h5>
+                    <p class="mb-0 small text-muted">Matriz de correlación entre variables clínicas numéricas. Valores cercanos a 1 indican correlación positiva, cercanos a -1 negativa.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm p-4">
+            <div id="heatmapLoading" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2 text-muted">Calculando correlaciones...</p>
+            </div>
+            <div id="heatmapContainer" style="display:none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-semibold mb-0"><i class="bi bi-grid-3x3 me-2 text-primary"></i>Correlación entre Variables Clínicas</h6>
+                    <div class="d-flex align-items-center gap-2 small text-muted">
+                        <span class="badge" style="background:#1a237e;padding:4px 8px">-1.0 Neg.</span>
+                        <span class="badge" style="background:#e3f2fd;color:#333;padding:4px 8px">0 Nula</span>
+                        <span class="badge" style="background:#b71c1c;padding:4px 8px">+1.0 Pos.</span>
+                    </div>
+                </div>
+                <div style="overflow-x:auto">
+                    <canvas id="chartHeatmap"></canvas>
+                </div>
+                <div id="heatmapLeyenda" class="mt-4 row g-2"></div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
 
@@ -223,7 +258,6 @@ async function loadSegmentacion() {
             apiCall('/analytics/segmentacion/imc/'),
             apiCall('/analytics/segmentacion/diagnostico/'),
         ]);
-        // Sexo chart
         if (sexoChart) sexoChart.destroy();
         sexoChart = new Chart(document.getElementById('chartSexoSeg'), {
             type: 'bar',
@@ -238,7 +272,6 @@ async function loadSegmentacion() {
             },
             options: { plugins: { legend: { position: 'bottom' } } }
         });
-        // IMC chart
         if (imcChart) imcChart.destroy();
         const imcColors = { 'Bajo peso': '#0dcaf0', 'Normal': '#198754', 'Sobrepeso': '#ffc107', 'Obesidad': '#dc3545' };
         imcChart = new Chart(document.getElementById('chartImcSeg'), {
@@ -249,7 +282,6 @@ async function loadSegmentacion() {
             },
             options: { plugins: { legend: { position: 'bottom' } } }
         });
-        // Diagnostico chart
         if (diagSegChart) diagSegChart.destroy();
         diagSegChart = new Chart(document.getElementById('chartDiagSeg'), {
             type: 'bar',
@@ -287,16 +319,143 @@ async function loadCriticos() {
     } catch (e) { showToast('Error cargando críticos', 'danger'); }
 }
 
-// Load all tabs
 loadKpis();
 
-// Load on tab switch
+let heatmapChart = null;
+
+async function loadHeatmap() {
+    try {
+        const data = await apiCall('/analytics/heatmap/');
+        document.getElementById('heatmapLoading').style.display = 'none';
+        document.getElementById('heatmapContainer').style.display = 'block';
+
+        const labels = data.labels;
+        const matrix = data.matrix;
+        const n = labels.length;
+
+        const values = Array.from({length: n}, () => Array(n).fill(0));
+        matrix.forEach(cell => {
+            const xi = labels.indexOf(cell.x);
+            const yi = labels.indexOf(cell.y);
+            if (xi >= 0 && yi >= 0) values[yi][xi] = cell.v;
+        });
+
+        function corrColor(v) {
+            const r = v >= 0 ? Math.round(183 + (v * 72))  : Math.round(255 + (v * 72));
+            const g = v >= 0 ? Math.round(28  + (v * 200)) : Math.round(28  + (v * 200));
+            const b = v >= 0 ? Math.round(28  - (v * 28))  : Math.round(158 - (v * 158));
+            const alpha = Math.abs(v) < 0.05 ? 0.15 : 0.2 + Math.abs(v) * 0.8;
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        const datasets = values.map((row, rowIdx) => ({
+            label: labels[rowIdx],
+            data: row.map((v, colIdx) => ({ x: labels[colIdx], y: labels[rowIdx], v })),
+            backgroundColor: row.map(v => corrColor(v)),
+            borderColor: 'rgba(200,200,200,0.3)',
+            borderWidth: 1,
+        }));
+
+        const cellPlugin = {
+            id: 'heatmapLabels',
+            afterDatasetsDraw(chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, di) => {
+                    const meta = chart.getDatasetMeta(di);
+                    meta.data.forEach((bar, i) => {
+                        const v = dataset.data[i].v;
+                        const absV = Math.abs(v);
+                        ctx.save();
+                        ctx.fillStyle = absV > 0.5 ? 'white' : '#333';
+                        ctx.font = 'bold 11px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(v.toFixed(2), bar.x, bar.y);
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        if (heatmapChart) heatmapChart.destroy();
+        const canvas = document.getElementById('chartHeatmap');
+        canvas.width = Math.max(600, n * 80);
+        canvas.height = Math.max(400, n * 60);
+
+        heatmapChart = new Chart(canvas, {
+            type: 'bar',
+            plugins: [cellPlugin],
+            data: { labels, datasets },
+            options: {
+                responsive: false,
+                indexAxis: 'y',
+                scales: {
+                    x: { stacked: true, display: true, ticks: { display: false }, grid: { display: false }, max: n },
+                    y: { stacked: true, ticks: { font: { size: 11, weight: 'bold' } }, grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const d = items[0].dataset.data[items[0].dataIndex];
+                                return `${d.y} × ${d.x}`;
+                            },
+                            label: (item) => {
+                                const v = item.dataset.data[item.dataIndex].v;
+                                const interp = v > 0.7 ? 'Muy fuerte positiva'
+                                    : v > 0.4 ? 'Moderada positiva'
+                                    : v > 0.1 ? 'Débil positiva'
+                                    : v < -0.7 ? 'Muy fuerte negativa'
+                                    : v < -0.4 ? 'Moderada negativa'
+                                    : v < -0.1 ? 'Débil negativa'
+                                    : 'Sin correlación';
+                                return `Correlación: ${v.toFixed(3)} (${interp})`;
+                            }
+                        }
+                    }
+                },
+                barThickness: 44,
+            }
+        });
+
+        const leyenda = document.getElementById('heatmapLeyenda');
+        const insights = [];
+        for (let i = 0; i < n; i++) {
+            for (let j = i+1; j < n; j++) {
+                const v = values[i][j];
+                if (Math.abs(v) > 0.35) insights.push({ a: labels[i], b: labels[j], v });
+            }
+        }
+        insights.sort((a,b) => Math.abs(b.v) - Math.abs(a.v));
+        leyenda.innerHTML = insights.slice(0,6).map(ins => {
+            const col = ins.v > 0 ? '#b71c1c' : '#1a237e';
+            const bg  = ins.v > 0 ? '#fde8ea' : '#e8eaf6';
+            const dir = ins.v > 0 ? '↑ Positiva' : '↓ Negativa';
+            return `<div class="col-md-4">
+                <div class="p-2 rounded-3 d-flex align-items-center gap-2" style="background:${bg}">
+                    <span style="color:${col};font-weight:700;font-size:18px">${ins.v > 0 ? '▲' : '▼'}</span>
+                    <div>
+                        <div style="font-size:12px;font-weight:600;color:${col}">${ins.a} — ${ins.b}</div>
+                        <div style="font-size:11px;color:#555">${dir}: ${ins.v.toFixed(3)}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+    } catch (e) {
+        document.getElementById('heatmapLoading').innerHTML =
+            '<p class="text-danger text-center py-4"><i class="bi bi-exclamation-circle me-2"></i>Error cargando heatmap. Ejecute el ETL primero.</p>';
+    }
+}
+
 document.querySelectorAll('#analyticsTabs .nav-link').forEach(tab => {
     tab.addEventListener('shown.bs.tab', e => {
         const target = e.target.getAttribute('href');
         if (target === '#tabEstadisticas') loadEstadisticas();
         else if (target === '#tabSegmentacion') loadSegmentacion();
         else if (target === '#tabCriticos') loadCriticos();
+        else if (target === '#tabHeatmap') loadHeatmap();
     });
 });
 </script>

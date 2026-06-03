@@ -199,3 +199,36 @@ def tendencia_edad_riesgo_view(request):
             'imc_promedio': round(grupo_qs.aggregate(v=Avg('imc'))['v'] or 0, 2),
         })
     return Response(result)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def heatmap_correlacion_view(request):
+    """Datos de correlación clínica para heatmap"""
+    qs = _get_pacientes_qs()
+    if not qs.exists():
+        return Response({'message': 'Sin datos'})
+
+    fields = ['edad', 'imc', 'glucosa', 'colesterol',
+              'presion_sistolica', 'frecuencia_cardiaca', 'saturacion_oxigeno']
+    labels = ['Edad', 'IMC', 'Glucosa', 'Colesterol',
+              'Presión S.', 'Frec. Card.', 'Saturación O₂']
+
+    import pandas as pd
+    vals = list(qs.values(*fields))
+    if not vals:
+        return Response({'message': 'Sin datos'})
+
+    df = pd.DataFrame(vals).dropna()
+    corr = df.corr().round(3)
+
+    matrix = []
+    for i, row_label in enumerate(labels):
+        for j, col_label in enumerate(labels):
+            matrix.append({
+                'x': col_label,
+                'y': row_label,
+                'v': float(corr.iloc[i, j])
+            })
+
+    return Response({'labels': labels, 'matrix': matrix})
