@@ -4,176 +4,477 @@
 {% block nav_dashboard %}active{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-    .dash-hero { background:linear-gradient(135deg,#0D2E6E 0%,#1565C0 50%,#0891B2 100%); border-radius:20px; padding:2rem 2.5rem; margin-bottom:1.75rem; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(13,46,110,0.35); }
-    .dash-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(0,180,216,0.25) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(255,255,255,0.07) 0%,transparent 50%); }
-    .hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px); background-size:40px 40px; }
-    .dash-hero-content { position:relative; z-index:1; }
-    .dash-hero h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.6rem; font-weight:800; color:#fff; margin:0; letter-spacing:-0.5px; }
-    .dash-hero p { color:rgba(255,255,255,0.6); font-size:0.88rem; margin:0.3rem 0 0; }
-    .hero-badges { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1.25rem; }
-    .hero-badge { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:50px; padding:0.35rem 0.9rem; font-size:0.76rem; color:rgba(255,255,255,0.85); font-weight:500; display:flex; align-items:center; gap:5px; }
-    .hero-badge i { color:#90E0EF; }
-    .hero-pulse { display:flex; align-items:center; gap:8px; background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); border-radius:50px; padding:0.35rem 0.9rem; font-size:0.76rem; color:#6EE7B7; font-weight:600; }
-    .pulse-dot { width:7px; height:7px; background:#10B981; border-radius:50%; animation:pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 50%{opacity:.7;box-shadow:0 0 0 5px rgba(16,185,129,0)} }
-    .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:1.75rem; }
+    /* ── RESET PAGE BG ───────────────────────── */
+    body { background: #0a0f1e !important; }
+    .page-content { background: #0a0f1e; padding: 0 !important; }
+    .topbar { background: rgba(10,15,30,0.95) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; backdrop-filter: blur(12px); }
+    .topbar-title { color: #fff !important; }
+    .topbar-right .topbar-user { color: rgba(255,255,255,0.5) !important; }
+    .status-pill { background: rgba(0,255,150,0.1) !important; color: #00ff96 !important; border: 1px solid rgba(0,255,150,0.2) !important; }
+    .status-pill::before { background: #00ff96 !important; }
+
+    /* ── HERO ────────────────────────────────── */
+    .d-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0d1b3e 0%, #0f2d5c 40%, #0a3d6b 70%, #0d2040 100%);
+        padding: 2.5rem 2.75rem 2rem;
+        margin-bottom: 0;
+    }
+    .d-hero::before {
+        content: '';
+        position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse 70% 100% at 90% 50%, rgba(0,180,216,0.15) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 80% at 10% 100%, rgba(13,110,253,0.2) 0%, transparent 55%);
+    }
+    .d-hero-grid {
+        position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 44px 44px;
+    }
+    .d-hero-glow {
+        position: absolute;
+        width: 500px; height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%);
+        top: -150px; right: -100px;
+        pointer-events: none;
+    }
+    .d-hero-content { position: relative; z-index: 2; }
+
+    .hero-eyebrow {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(0,255,150,0.1);
+        border: 1px solid rgba(0,255,150,0.25);
+        border-radius: 50px;
+        padding: 4px 14px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #00ff96;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+    .hero-eyebrow::before {
+        content: '';
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: #00ff96;
+        animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .d-hero h1 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin-bottom: 0.6rem;
+    }
+    .d-hero h1 .grad {
+        background: linear-gradient(135deg, #90e0ef, #00b4d8, #0077b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .d-hero p {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.92rem;
+        font-weight: 300;
+        line-height: 1.6;
+        max-width: 520px;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .hero-tag {
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50px;
+        padding: 5px 14px;
+        font-size: 0.76rem;
+        color: rgba(255,255,255,0.7);
+        font-weight: 500;
+        backdrop-filter: blur(6px);
+        transition: all .2s;
+    }
+    .hero-tag:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .hero-tag i { font-size: 0.72rem; color: #00b4d8; }
+
+    .hero-right {
+        text-align: right;
+    }
+    .hero-right .date-label {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.35);
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 4px;
+    }
+    .hero-right .user-name {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.3px;
+    }
+    .hero-right .user-role {
+        font-size: 0.76rem;
+        color: rgba(255,255,255,0.4);
+        margin-top: 2px;
+    }
+
+    /* ── MAIN CONTENT ────────────────────────── */
+    .dash-body {
+        padding: 1.75rem 2.75rem;
+        background: #0a0f1e;
+        min-height: calc(100vh - 220px);
+    }
+
+    /* ── SECTION LABEL ───────────────────────── */
+    .sec-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: rgba(255,255,255,0.25);
+        margin-bottom: 0.85rem;
+        padding-left: 2px;
+    }
+
+    /* ── KPI CARDS ───────────────────────────── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-bottom: 1.75rem;
+    }
     @media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-    .kpi-v2 { background:#fff; border-radius:16px; padding:1.25rem 1.25rem 1rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; position:relative; overflow:hidden; transition:transform .2s ease,box-shadow .2s ease; cursor:default; }
-    .kpi-v2:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.12); }
-    .kpi-v2 .kpi-accent { position:absolute; top:0; left:0; right:0; height:4px; border-radius:16px 16px 0 0; }
-    .kpi-v2 .kpi-bg-icon { position:absolute; right:-8px; bottom:-8px; font-size:4rem; opacity:0.06; line-height:1; }
-    .kpi-v2 .kpi-icon-box { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.9rem; }
-    .kpi-v2 .kpi-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.85rem; font-weight:800; letter-spacing:-1.5px; line-height:1; margin-bottom:3px; }
-    .kpi-v2 .kpi-lbl { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:#8B9AB3; }
-    .kpi-v2 .kpi-sub { font-size:0.72rem; color:#10B981; font-weight:500; margin-top:4px; display:flex; align-items:center; gap:3px; }
-    .chart-v2 { background:#fff; border-radius:18px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; height:100%; }
-    .chart-v2-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; padding-bottom:0.85rem; border-bottom:1px solid #F1F5FD; }
-    .chart-v2-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; font-weight:700; color:#1A2B4A; display:flex; align-items:center; gap:8px; }
-    .chart-v2-title .ct-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; }
-    .chart-badge { font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:50px; }
-    .bottom-card { background:#fff; border-radius:18px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; overflow:hidden; }
-    .bottom-card-header { padding:1.1rem 1.5rem; border-bottom:1px solid #F1F5FD; display:flex; align-items:center; justify-content:space-between; }
-    .bottom-card-header h6 { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.88rem; font-weight:700; color:#1A2B4A; margin:0; display:flex; align-items:center; gap:8px; }
-    .table-dash { font-size:0.82rem; margin:0; width:100%; border-collapse:collapse; }
-    .table-dash thead th { background:#F8FAFF; color:#8B9AB3; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; padding:0.65rem 1rem; border-bottom:1px solid #EEF2FB; }
-    .table-dash tbody td { padding:0.7rem 1rem; vertical-align:middle; border-bottom:1px solid #F5F7FD; color:#2C3E6A; }
-    .table-dash tbody tr:last-child td { border-bottom:none; }
-    .table-dash tbody tr:hover { background:#F8FAFF; }
-    .section-lbl { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#8B9AB3; margin-bottom:0.75rem; padding-left:2px; }
-    .rbadge { display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:700; padding:2px 9px; border-radius:50px; }
-    .rbadge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
-    .rbadge-bajo   { background:#ECFDF5; color:#059669; }
-    .rbadge-medio  { background:#FFFBEB; color:#D97706; }
-    .rbadge-alto   { background:#FFF7ED; color:#EA580C; }
-    .rbadge-critico{ background:#FEF2F2; color:#DC2626; animation:blink 1.5s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.6} }
-    .etl-status { font-size:0.71rem; font-weight:700; padding:2px 9px; border-radius:50px; display:inline-block; }
-    .etl-ok  { background:#ECFDF5; color:#059669; }
-    .etl-err { background:#FEF2F2; color:#DC2626; }
-    .etl-proc{ background:#EFF6FF; color:#2563EB; }
-    .kpi-skeleton { background:linear-gradient(90deg,#f0f4ff 25%,#e4ecff 50%,#f0f4ff 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:8px; }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .kpi-dark {
+        background: #111827;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px;
+        padding: 1.25rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+        cursor: default;
+    }
+    .kpi-dark:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255,255,255,0.15);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+    .kpi-dark .kpi-glow {
+        position: absolute;
+        top: -20px; right: -20px;
+        width: 100px; height: 100px;
+        border-radius: 50%;
+        filter: blur(30px);
+        opacity: 0.25;
+    }
+    .kpi-dark .kpi-top {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 0.85rem;
+    }
+    .kpi-dark .kpi-icon {
+        width: 36px; height: 36px;
+        border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+    }
+    .kpi-dark .kpi-trend {
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 50px;
+    }
+    .kpi-dark .kpi-num {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -2px;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+    .kpi-dark .kpi-lbl {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: rgba(255,255,255,0.35);
+    }
+    .kpi-dark .kpi-sub {
+        font-size: 0.7rem;
+        font-weight: 500;
+        margin-top: 5px;
+        display: flex; align-items: center; gap: 3px;
+    }
+
+    /* ── CHART CARDS ─────────────────────────── */
+    .chart-dark {
+        background: #111827;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 18px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: border-color .2s;
+    }
+    .chart-dark:hover { border-color: rgba(255,255,255,0.12); }
+    .chart-dark-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .chart-dark-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .chart-dark-title .cti {
+        width: 28px; height: 28px;
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8rem;
+    }
+    .chart-pill {
+        font-size: 0.68rem; font-weight: 600;
+        padding: 3px 10px; border-radius: 50px;
+    }
+
+    /* ── BOTTOM CARDS ────────────────────────── */
+    .bottom-dark {
+        background: #111827;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: border-color .2s;
+    }
+    .bottom-dark:hover { border-color: rgba(255,255,255,0.12); }
+    .bottom-dark-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .bottom-dark-header h6 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.85rem; font-weight: 700; color: #fff; margin: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .bottom-dark-header a {
+        font-size: 0.74rem; color: #00b4d8; text-decoration: none; font-weight: 600;
+        transition: color .15s;
+    }
+    .bottom-dark-header a:hover { color: #90e0ef; }
+
+    /* ── TABLE DARK ──────────────────────────── */
+    .td-table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
+    .td-table thead th {
+        background: rgba(255,255,255,0.03);
+        color: rgba(255,255,255,0.3);
+        font-size: 0.67rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.7px;
+        padding: 0.6rem 1.25rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .td-table tbody td {
+        padding: 0.7rem 1.25rem;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        color: rgba(255,255,255,0.75);
+        vertical-align: middle;
+    }
+    .td-table tbody tr:last-child td { border-bottom: none; }
+    .td-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
+
+    /* ── RISK BADGES ─────────────────────────── */
+    .rb { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:50px; }
+    .rb::before { content:''; width:4px; height:4px; border-radius:50%; background:currentColor; }
+    .rb-bajo    { background:rgba(0,255,150,0.1);  color:#00ff96; }
+    .rb-medio   { background:rgba(251,191,36,0.12); color:#fbbf24; }
+    .rb-alto    { background:rgba(251,146,60,0.12); color:#fb923c; }
+    .rb-critico { background:rgba(239,68,68,0.12);  color:#ef4444; animation:rblink 1.5s infinite; }
+    @keyframes rblink { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+    /* ── ETL STATUS ──────────────────────────── */
+    .es { font-size:0.68rem; font-weight:700; padding:2px 9px; border-radius:50px; display:inline-block; }
+    .es-ok   { background:rgba(0,255,150,0.1);  color:#00ff96; }
+    .es-err  { background:rgba(239,68,68,0.12); color:#ef4444; }
+    .es-proc { background:rgba(59,130,246,0.12);color:#60a5fa; }
+
+    /* ── SKELETON ────────────────────────────── */
+    .skel { background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation:sk 1.4s infinite; border-radius:8px; }
+    @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="dash-hero mb-4">
-    <div class="hero-grid"></div>
-    <div class="dash-hero-content d-flex justify-content-between align-items-start flex-wrap gap-3">
+<!-- HERO -->
+<div class="d-hero">
+    <div class="d-hero-grid"></div>
+    <div class="d-hero-glow"></div>
+    <div class="d-hero-content d-flex justify-content-between align-items-start flex-wrap gap-3">
         <div>
-            <h2>Dashboard Clínico</h2>
-            <p id="heroDate">Plataforma de Analítica Médica Inteligente</p>
-            <div class="hero-badges">
-                <div class="hero-pulse"><div class="pulse-dot"></div>Sistema en línea</div>
-                <div class="hero-badge"><i class="bi bi-cpu-fill"></i> ML Activo</div>
-                <div class="hero-badge"><i class="bi bi-database-fill"></i> ETL Listo</div>
-                <div class="hero-badge"><i class="bi bi-shield-fill-check"></i> JWT Seguro</div>
+            <div class="hero-eyebrow">Pipeline ETL ejecutado</div>
+            <h1>Decisiones clínicas,<br><span class="grad">apoyadas por datos</span></h1>
+            <p id="heroDesc">Plataforma de analítica médica inteligente con detección automática de riesgo, modelos predictivos y alertas clínicas en tiempo real.</p>
+            <div class="hero-tags">
+                <div class="hero-tag"><i class="bi bi-database-fill"></i> <span id="heroReg">1800</span> pacientes limpios</div>
+                <div class="hero-tag"><i class="bi bi-graph-up-arrow"></i> Diagnósticos normalizados</div>
+                <div class="hero-tag"><i class="bi bi-shield-fill-check"></i> Detección de anomalías</div>
+                <div class="hero-tag"><i class="bi bi-cpu-fill"></i> Score predictivo ML</div>
             </div>
         </div>
-        <div class="text-end" style="z-index:1">
-            <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Bienvenido</div>
-            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:700;color:#fff" id="heroUser">—</div>
-            <div style="font-size:0.76rem;color:rgba(255,255,255,0.5)" id="heroRole">—</div>
-        </div>
-    </div>
-</div>
-
-<div class="section-lbl">Indicadores Clave</div>
-<div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
-</div>
-
-<div class="section-lbl">Distribución Clínica</div>
-<div class="row g-3 mb-3">
-    <div class="col-lg-4">
-        <div class="chart-v2">
-            <div class="chart-v2-header">
-                <div class="chart-v2-title"><div class="ct-icon" style="background:#EFF6FF"><i class="bi bi-pie-chart-fill" style="color:#2563EB"></i></div>Distribución de Riesgo</div>
-                <span class="chart-badge" style="background:#EFF6FF;color:#2563EB">En vivo</span>
-            </div>
-            <canvas id="chartRiesgo" height="200"></canvas>
-        </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="chart-v2">
-            <div class="chart-v2-header">
-                <div class="chart-v2-title"><div class="ct-icon" style="background:#F0FDF4"><i class="bi bi-bar-chart-fill" style="color:#059669"></i></div>Riesgo por Grupo de Edad</div>
-                <span class="chart-badge" style="background:#F0FDF4;color:#059669">Apilado</span>
-            </div>
-            <canvas id="chartEdad" height="200"></canvas>
+        <div class="hero-right">
+            <div class="date-label" id="heroDate">—</div>
+            <div class="user-name" id="heroUser">—</div>
+            <div class="user-role" id="heroRole">—</div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-lg-6">
-        <div class="chart-v2">
-            <div class="chart-v2-header">
-                <div class="chart-v2-title"><div class="ct-icon" style="background:#FDF4FF"><i class="bi bi-gender-ambiguous" style="color:#9333EA"></i></div>Distribución por Sexo</div>
-            </div>
-            <canvas id="chartSexo" height="180"></canvas>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="chart-v2">
-            <div class="chart-v2-header">
-                <div class="chart-v2-title"><div class="ct-icon" style="background:#FFF7ED"><i class="bi bi-activity" style="color:#EA580C"></i></div>Distribución por IMC</div>
-            </div>
-            <canvas id="chartImc" height="180"></canvas>
-        </div>
-    </div>
-</div>
+<!-- BODY -->
+<div class="dash-body">
 
-<div class="section-lbl">Alertas y Actividad Reciente</div>
-<div class="row g-3">
-    <div class="col-lg-6">
-        <div class="bottom-card">
-            <div class="bottom-card-header">
-                <h6><span style="width:26px;height:26px;background:#FEF2F2;border-radius:7px;display:inline-flex;align-items:center;justify-content:center"><i class="bi bi-exclamation-triangle-fill" style="color:#DC2626;font-size:.8rem"></i></span>Pacientes Críticos</h6>
-                <a href="/pacientes/?critico=true" style="font-size:0.76rem;color:#1565C0;text-decoration:none;font-weight:600">Ver todos →</a>
-            </div>
-            <div id="tablaCriticos" style="max-height:280px;overflow-y:auto">
-                <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>
-            </div>
+    <!-- KPIs -->
+    <div class="sec-label">Indicadores Clave</div>
+    <div class="kpi-grid" id="kpiGrid">
+        {% for i in "123456" %}
+        <div class="kpi-dark">
+            <div class="skel mb-2" style="width:36px;height:36px;border-radius:9px"></div>
+            <div class="skel mb-1" style="height:32px;width:60%"></div>
+            <div class="skel" style="height:10px;width:75%"></div>
         </div>
+        {% endfor %}
     </div>
-    <div class="col-lg-6">
-        <div class="bottom-card">
-            <div class="bottom-card-header">
-                <h6><span style="width:26px;height:26px;background:#F0FDF4;border-radius:7px;display:inline-flex;align-items:center;justify-content:center"><i class="bi bi-clock-history" style="color:#059669;font-size:.8rem"></i></span>Últimos Procesos ETL</h6>
-                <a href="/etl/" style="font-size:0.76rem;color:#059669;text-decoration:none;font-weight:600">Ejecutar ETL →</a>
-            </div>
-            <div id="tablaEtl">
-                <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success"></div></div>
-            </div>
-        </div>
-    </div>
-</div>
 
+    <!-- CHARTS ROW 1 -->
+    <div class="sec-label">Distribución Clínica</div>
+    <div class="row g-3 mb-3">
+        <div class="col-lg-4">
+            <div class="chart-dark">
+                <div class="chart-dark-header">
+                    <div class="chart-dark-title">
+                        <div class="cti" style="background:rgba(37,99,235,0.2)"><i class="bi bi-pie-chart-fill" style="color:#60a5fa"></i></div>
+                        Distribución de Riesgo
+                    </div>
+                    <span class="chart-pill" style="background:rgba(0,255,150,0.08);color:#00ff96">En vivo</span>
+                </div>
+                <canvas id="chartRiesgo" height="200"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="chart-dark">
+                <div class="chart-dark-header">
+                    <div class="chart-dark-title">
+                        <div class="cti" style="background:rgba(0,180,216,0.15)"><i class="bi bi-bar-chart-fill" style="color:#00b4d8"></i></div>
+                        Riesgo por Grupo de Edad
+                    </div>
+                    <span class="chart-pill" style="background:rgba(0,180,216,0.1);color:#00b4d8">Apilado</span>
+                </div>
+                <canvas id="chartEdad" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS ROW 2 -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-dark">
+                <div class="chart-dark-header">
+                    <div class="chart-dark-title">
+                        <div class="cti" style="background:rgba(147,51,234,0.15)"><i class="bi bi-gender-ambiguous" style="color:#c084fc"></i></div>
+                        Distribución por Sexo
+                    </div>
+                </div>
+                <canvas id="chartSexo" height="180"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-dark">
+                <div class="chart-dark-header">
+                    <div class="chart-dark-title">
+                        <div class="cti" style="background:rgba(251,146,60,0.15)"><i class="bi bi-activity" style="color:#fb923c"></i></div>
+                        Distribución por IMC
+                    </div>
+                </div>
+                <canvas id="chartImc" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="sec-label">Alertas y Actividad Reciente</div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="bottom-dark">
+                <div class="bottom-dark-header">
+                    <h6>
+                        <span style="width:24px;height:24px;background:rgba(239,68,68,0.15);border-radius:6px;display:inline-flex;align-items:center;justify-content:center">
+                            <i class="bi bi-exclamation-triangle-fill" style="color:#ef4444;font-size:.7rem"></i>
+                        </span>
+                        Pacientes Críticos
+                    </h6>
+                    <a href="/pacientes/?critico=true">Ver todos →</a>
+                </div>
+                <div id="tablaCriticos" style="max-height:280px;overflow-y:auto">
+                    <div class="text-center py-4"><div class="spinner-border spinner-border-sm" style="color:#00b4d8"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="bottom-dark">
+                <div class="bottom-dark-header">
+                    <h6>
+                        <span style="width:24px;height:24px;background:rgba(0,255,150,0.1);border-radius:6px;display:inline-flex;align-items:center;justify-content:center">
+                            <i class="bi bi-clock-history" style="color:#00ff96;font-size:.7rem"></i>
+                        </span>
+                        Últimos Procesos ETL
+                    </h6>
+                    <a href="/etl/">Ejecutar ETL →</a>
+                </div>
+                <div id="tablaEtl">
+                    <div class="text-center py-4"><div class="spinner-border spinner-border-sm" style="color:#00ff96"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <script>
+// Hero init
 const _u = (() => { try { return JSON.parse(localStorage.getItem('user')||'{}'); } catch { return {}; } })();
 document.getElementById('heroUser').textContent = `${_u.nombres||''} ${_u.apellidos||''}`.trim() || '—';
 document.getElementById('heroRole').textContent = _u.role || '—';
 document.getElementById('heroDate').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-const RISK_COLORS_DASH = { 'Bajo':'#10B981','Medio':'#F59E0B','Alto':'#F97316','Crítico':'#EF4444' };
-let chartRiesgo, chartEdad, chartSexo, chartImc;
+const RC = { 'Bajo':'#00ff96','Medio':'#fbbf24','Alto':'#fb923c','Crítico':'#ef4444' };
+let cR, cE, cS, cI;
+
+const chartDefaults = {
+    color: 'rgba(255,255,255,0.6)',
+    borderColor: 'rgba(255,255,255,0.06)',
+};
+Chart.defaults.color = 'rgba(255,255,255,0.5)';
 
 async function loadDashboard() {
     try {
-        const [kpis, edadData, sexoData, imcData, criticos, etlHist] = await Promise.all([
+        const [kpis, edad, sexo, imc, criticos, etl] = await Promise.all([
             apiCall('/dashboard/kpis/'),
             apiCall('/analytics/tendencia-edad/'),
             apiCall('/analytics/segmentacion/sexo/'),
@@ -182,104 +483,120 @@ async function loadDashboard() {
             apiCall('/etl/historial/'),
         ]);
         renderKPIs(kpis);
-        renderChartRiesgo(kpis.distribucion_riesgo || {});
-        renderChartEdad(edadData || []);
-        renderChartSexo(sexoData || []);
-        renderChartImc(imcData || []);
+        renderRiesgo(kpis.distribucion_riesgo||{});
+        renderEdad(edad||[]);
+        renderSexo(sexo||[]);
+        renderImc(imc||[]);
         renderCriticos(criticos);
-        renderEtlHistory(etlHist);
-    } catch (err) { showToast('Error cargando dashboard: ' + err.message, 'danger'); }
+        renderEtl(etl);
+        document.getElementById('heroReg').textContent = (kpis.total_pacientes||0).toLocaleString('es-CO');
+    } catch(e) { showToast('Error cargando dashboard: '+e.message,'danger'); }
 }
 
 function renderKPIs(d) {
     const kpis = [
-        { label:'Total Pacientes',    value:d.total_pacientes||0,    icon:'people-fill',      color:'#2563EB', bg:'#EFF6FF', accent:'#2563EB', sub:'' },
-        { label:'Pacientes Críticos', value:d.pacientes_criticos||0, icon:'heart-pulse-fill', color:'#DC2626', bg:'#FEF2F2', accent:'#DC2626', sub:d.porcentaje_criticos+'%' },
-        { label:'Hipertensos',        value:d.pacientes_hipertensos||0,icon:'droplet-fill',   color:'#EA580C', bg:'#FFF7ED', accent:'#EA580C', sub:d.porcentaje_hipertensos+'%' },
-        { label:'Diabéticos',         value:d.pacientes_diabeticos||0, icon:'capsule',        color:'#9333EA', bg:'#FDF4FF', accent:'#9333EA', sub:d.porcentaje_diabeticos+'%' },
-        { label:'Fumadores',          value:d.pacientes_fumadores||0,  icon:'wind',           color:'#0891B2', bg:'#ECFEFF', accent:'#0891B2', sub:'' },
-        { label:'Promedio IMC',       value:d.promedio_imc||0,         icon:'person-fill',    color:'#059669', bg:'#F0FDF4', accent:'#059669', sub:'' },
+        { label:'Total Pacientes',    value:d.total_pacientes||0,      icon:'people-fill',      color:'#60a5fa', glow:'#3b82f6', bg:'rgba(59,130,246,0.15)',  sub:'', pct:'' },
+        { label:'Pacientes Críticos', value:d.pacientes_criticos||0,   icon:'heart-pulse-fill', color:'#ef4444', glow:'#ef4444', bg:'rgba(239,68,68,0.15)',   sub:d.porcentaje_criticos, pct:'% del total' },
+        { label:'Hipertensos',        value:d.pacientes_hipertensos||0,icon:'droplet-fill',      color:'#fb923c', glow:'#f97316', bg:'rgba(249,115,22,0.15)',  sub:d.porcentaje_hipertensos, pct:'% del total' },
+        { label:'Diabéticos',         value:d.pacientes_diabeticos||0, icon:'capsule',           color:'#c084fc', glow:'#9333ea', bg:'rgba(147,51,234,0.15)', sub:d.porcentaje_diabeticos, pct:'% del total' },
+        { label:'Fumadores',          value:d.pacientes_fumadores||0,  icon:'wind',              color:'#22d3ee', glow:'#06b6d4', bg:'rgba(6,182,212,0.15)',  sub:'', pct:'' },
+        { label:'Promedio IMC',       value:d.promedio_imc||0,         icon:'person-fill',       color:'#00ff96', glow:'#00ff96', bg:'rgba(0,255,150,0.1)',   sub:'', pct:'' },
     ];
     document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
-        <div class="kpi-v2">
-            <div class="kpi-accent" style="background:${k.accent}"></div>
-            <div class="kpi-bg-icon"><i class="bi bi-${k.icon}" style="color:${k.color}"></i></div>
-            <div class="kpi-icon-box" style="background:${k.bg}"><i class="bi bi-${k.icon}" style="color:${k.color}"></i></div>
+        <div class="kpi-dark">
+            <div class="kpi-glow" style="background:${k.glow}"></div>
+            <div class="kpi-top">
+                <div class="kpi-icon" style="background:${k.bg}">
+                    <i class="bi bi-${k.icon}" style="color:${k.color}"></i>
+                </div>
+                ${k.sub ? `<span class="kpi-trend" style="background:${k.bg};color:${k.color}">↑ ${k.sub}${k.pct}</span>` : ''}
+            </div>
             <div class="kpi-num" style="color:${k.color}">${typeof k.value==='number'?k.value.toLocaleString('es-CO'):k.value}</div>
             <div class="kpi-lbl">${k.label}</div>
-            ${k.sub?`<div class="kpi-sub"><i class="bi bi-arrow-up-right" style="font-size:.65rem"></i>${k.sub} del total</div>`:''}
         </div>`).join('');
 }
 
-function renderChartRiesgo(dist) {
-    if (chartRiesgo) chartRiesgo.destroy();
+function renderRiesgo(dist) {
+    if(cR) cR.destroy();
     const labels = Object.keys(dist), values = Object.values(dist);
-    chartRiesgo = new Chart(document.getElementById('chartRiesgo'), {
+    cR = new Chart(document.getElementById('chartRiesgo'), {
         type:'doughnut',
-        data:{ labels, datasets:[{ data:values, backgroundColor:labels.map(l=>RISK_COLORS_DASH[l]||'#adb5bd'), borderWidth:4, borderColor:'#fff', hoverBorderWidth:0 }] },
-        options:{ cutout:'70%', plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, padding:16, usePointStyle:true, pointStyleWidth:8 } } } }
+        data:{ labels, datasets:[{ data:values, backgroundColor:labels.map(l=>RC[l]||'#555'), borderWidth:3, borderColor:'#111827', hoverBorderWidth:0 }] },
+        options:{ cutout:'72%', plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, padding:14, usePointStyle:true, pointStyleWidth:8 } } } }
     });
 }
 
-function renderChartEdad(data) {
-    if (chartEdad) chartEdad.destroy();
-    chartEdad = new Chart(document.getElementById('chartEdad'), {
+function renderEdad(data) {
+    if(cE) cE.destroy();
+    cE = new Chart(document.getElementById('chartEdad'), {
         type:'bar',
         data:{ labels:data.map(d=>d.grupo_edad), datasets:[
-            { label:'Bajo',    data:data.map(d=>d.bajo),    backgroundColor:'#10B981', borderRadius:4 },
-            { label:'Medio',   data:data.map(d=>d.medio),   backgroundColor:'#F59E0B', borderRadius:4 },
-            { label:'Alto',    data:data.map(d=>d.alto),    backgroundColor:'#F97316', borderRadius:4 },
-            { label:'Crítico', data:data.map(d=>d.critico), backgroundColor:'#EF4444', borderRadius:4 },
+            { label:'Bajo',    data:data.map(d=>d.bajo),    backgroundColor:'#00ff96', borderRadius:4 },
+            { label:'Medio',   data:data.map(d=>d.medio),   backgroundColor:'#fbbf24', borderRadius:4 },
+            { label:'Alto',    data:data.map(d=>d.alto),    backgroundColor:'#fb923c', borderRadius:4 },
+            { label:'Crítico', data:data.map(d=>d.critico), backgroundColor:'#ef4444', borderRadius:4 },
         ]},
-        options:{ scales:{ x:{stacked:true,grid:{display:false}}, y:{stacked:true,grid:{color:'#F1F5FD'}} }, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
+        options:{
+            scales:{
+                x:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)',font:{size:11}} },
+                y:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)',font:{size:11}} }
+            },
+            plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } }
+        }
     });
 }
 
-function renderChartSexo(data) {
-    if (chartSexo) chartSexo.destroy();
-    chartSexo = new Chart(document.getElementById('chartSexo'), {
+function renderSexo(data) {
+    if(cS) cS.destroy();
+    cS = new Chart(document.getElementById('chartSexo'), {
         type:'bar',
         data:{ labels:data.map(d=>d.sexo==='M'?'Masculino':'Femenino'), datasets:[
-            { label:'Total',    data:data.map(d=>d.total),   backgroundColor:['#3B82F6','#EC4899'], borderRadius:6 },
-            { label:'Críticos', data:data.map(d=>d.criticos),backgroundColor:['#1D4ED8','#BE185D'], borderRadius:6 },
+            { label:'Total',    data:data.map(d=>d.total),   backgroundColor:['#3b82f6','#ec4899'], borderRadius:6 },
+            { label:'Críticos', data:data.map(d=>d.criticos),backgroundColor:['#1d4ed8','#be185d'], borderRadius:6 },
         ]},
-        options:{ scales:{ x:{grid:{display:false}}, y:{grid:{color:'#F1F5FD'}} }, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
+        options:{
+            scales:{
+                x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} },
+                y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} }
+            },
+            plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } }
+        }
     });
 }
 
-function renderChartImc(data) {
-    if (chartImc) chartImc.destroy();
-    const colors = { 'Bajo peso':'#06B6D4','Normal':'#10B981','Sobrepeso':'#F59E0B','Obesidad':'#EF4444' };
-    chartImc = new Chart(document.getElementById('chartImc'), {
+function renderImc(data) {
+    if(cI) cI.destroy();
+    const colors = { 'Bajo peso':'#22d3ee','Normal':'#00ff96','Sobrepeso':'#fbbf24','Obesidad':'#ef4444' };
+    cI = new Chart(document.getElementById('chartImc'), {
         type:'pie',
-        data:{ labels:data.map(d=>d.imc_clasificacion), datasets:[{ data:data.map(d=>d.total), backgroundColor:data.map(d=>colors[d.imc_clasificacion]||'#adb5bd'), borderWidth:4, borderColor:'#fff' }] },
-        options:{ plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
+        data:{ labels:data.map(d=>d.imc_clasificacion), datasets:[{ data:data.map(d=>d.total), backgroundColor:data.map(d=>colors[d.imc_clasificacion]||'#555'), borderWidth:3, borderColor:'#111827' }] },
+        options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
     });
 }
 
 function renderCriticos(data) {
     const c = document.getElementById('tablaCriticos');
-    if (!data?.pacientes?.length) { c.innerHTML='<p class="text-muted text-center py-4" style="font-size:.84rem"><i class="bi bi-check-circle-fill text-success me-2"></i>Sin pacientes críticos</p>'; return; }
-    c.innerHTML = `<table class="table-dash"><thead><tr><th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th></tr></thead><tbody>`
+    if(!data?.pacientes?.length){ c.innerHTML='<p class="text-center py-4" style="color:rgba(255,255,255,0.3);font-size:.84rem"><i class="bi bi-check-circle-fill me-2" style="color:#00ff96"></i>Sin pacientes críticos</p>'; return; }
+    c.innerHTML = `<table class="td-table"><thead><tr><th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th></tr></thead><tbody>`
         + data.pacientes.slice(0,8).map(p=>`<tr>
-            <td><strong style="color:#1A2B4A">${p.nombres} ${p.apellidos}</strong><br><small class="text-muted">${p.edad} años · ${p.diagnostico_preliminar}</small></td>
-            <td><span class="rbadge ${p.presion_sistolica>180?'rbadge-critico':'rbadge-medio'}">${p.presion_sistolica} mmHg</span></td>
-            <td><span class="rbadge ${p.glucosa>300?'rbadge-critico':'rbadge-bajo'}">${(p.glucosa||0).toFixed(1)}</span></td>
-            <td><span class="rbadge ${p.saturacion_oxigeno<85?'rbadge-critico':'rbadge-bajo'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td>
+            <td><strong style="color:#fff">${p.nombres} ${p.apellidos}</strong><br><small style="color:rgba(255,255,255,0.35)">${p.edad} años · ${p.diagnostico_preliminar}</small></td>
+            <td><span class="rb ${p.presion_sistolica>180?'rb-critico':'rb-medio'}">${p.presion_sistolica} mmHg</span></td>
+            <td><span class="rb ${p.glucosa>300?'rb-critico':'rb-bajo'}">${(p.glucosa||0).toFixed(1)}</span></td>
+            <td><span class="rb ${p.saturacion_oxigeno<85?'rb-critico':'rb-bajo'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td>
         </tr>`).join('') + '</tbody></table>';
 }
 
-function renderEtlHistory(data) {
+function renderEtl(data) {
     const c = document.getElementById('tablaEtl');
-    if (!data?.length) { c.innerHTML='<p class="text-center text-muted py-4" style="font-size:.84rem"><i class="bi bi-arrow-repeat me-2"></i>Sin procesos ETL ejecutados</p>'; return; }
-    const sc = { 'COMPLETADO':'etl-ok','ERROR':'etl-err','EN_PROCESO':'etl-proc','PENDIENTE':'etl-proc' };
-    c.innerHTML = `<table class="table-dash"><thead><tr><th>Fecha</th><th>Fuente</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead><tbody>`
+    if(!data?.length){ c.innerHTML='<p class="text-center py-4" style="color:rgba(255,255,255,0.3);font-size:.84rem"><i class="bi bi-arrow-repeat me-2"></i>Sin procesos ETL ejecutados</p>'; return; }
+    const sc = {'COMPLETADO':'es-ok','ERROR':'es-err','EN_PROCESO':'es-proc','PENDIENTE':'es-proc'};
+    c.innerHTML = `<table class="td-table"><thead><tr><th>Fecha</th><th>Fuente</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead><tbody>`
         + data.slice(0,6).map(e=>`<tr>
             <td style="white-space:nowrap"><small>${new Date(e.fecha_inicio).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}</small></td>
-            <td><small style="color:#6B778C">${e.fuente}</small></td>
-            <td><strong style="color:#1565C0">${e.registros_cargados}</strong></td>
+            <td><small style="color:rgba(255,255,255,0.4)">${e.fuente}</small></td>
+            <td><strong style="color:#60a5fa">${e.registros_cargados}</strong></td>
             <td><small>${e.tiempo_ejecucion?e.tiempo_ejecucion.toFixed(1)+'s':'—'}</small></td>
-            <td><span class="etl-status ${sc[e.estado]||'etl-proc'}">${e.estado}</span></td>
+            <td><span class="es ${sc[e.estado]||'es-proc'}">${e.estado}</span></td>
         </tr>`).join('') + '</tbody></table>';
 }
 
