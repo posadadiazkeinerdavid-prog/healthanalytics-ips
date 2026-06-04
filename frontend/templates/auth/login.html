@@ -4,84 +4,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthAnalytics IPS — Iniciar Sesión</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <style>
-        body { min-height:100vh; background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0d6efd 100%); display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',sans-serif; }
-        .login-card { background:#fff; border-radius:20px; padding:2.5rem; width:100%; max-width:420px; box-shadow:0 24px 60px rgba(0,0,0,.4); }
-        .logo-circle { width:64px; height:64px; background:#0d6efd; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; }
-        .btn-login { background:#0d6efd; border:none; padding:.75rem; font-weight:600; font-size:1rem; }
-        .btn-login:hover { background:#0b5ed7; }
-        .input-group-text { background:#f8f9fa; border-right:none; }
-        .form-control { border-left:none; }
-        .alert-demo { background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; font-size:.82rem; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --blue-deep:   #0A1628;
+            --blue-mid:    #0D2E6E;
+            --blue-bright: #1565C0;
+            --blue-vivid:  #1E88E5;
+            --cyan:        #00B4D8;
+            --cyan-light:  #90E0EF;
+            --white:       #FFFFFF;
+            --glass:       rgba(255,255,255,0.07);
+            --glass-border:rgba(255,255,255,0.13);
+        }
+        body { min-height:100vh; font-family:'DM Sans',sans-serif; background:var(--blue-deep); display:flex; overflow:hidden; position:relative; }
+        .bg-layer { position:fixed; inset:0; z-index:0; background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(21,101,192,0.55) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 80% 30%, rgba(0,180,216,0.3) 0%, transparent 55%), radial-gradient(ellipse 50% 50% at 50% 90%, rgba(13,46,110,0.8) 0%, transparent 70%), linear-gradient(135deg, #0A1628 0%, #0D2E6E 50%, #0A1628 100%); }
+        .orb { position:fixed; border-radius:50%; filter:blur(60px); animation:floatOrb 8s ease-in-out infinite; z-index:0; }
+        .orb-1 { width:400px; height:400px; background:rgba(21,101,192,0.4); top:-100px; left:-100px; animation-delay:0s; }
+        .orb-2 { width:300px; height:300px; background:rgba(0,180,216,0.3); top:40%; right:5%; animation-delay:-3s; }
+        .orb-3 { width:250px; height:250px; background:rgba(30,136,229,0.35); bottom:-50px; left:30%; animation-delay:-5s; }
+        @keyframes floatOrb { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-15px,15px) scale(0.97)} }
+        .grid-overlay { position:fixed; inset:0; z-index:0; background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px); background-size:50px 50px; }
+        .layout { display:flex; width:100%; min-height:100vh; position:relative; z-index:1; }
+        .left-panel { flex:1.1; display:flex; flex-direction:column; justify-content:center; padding:3rem 4rem; position:relative; }
+        .brand { display:flex; align-items:center; gap:14px; margin-bottom:4rem; }
+        .brand-icon { width:52px; height:52px; background:linear-gradient(135deg,var(--cyan),var(--blue-vivid)); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:0 8px 32px rgba(0,180,216,0.4); }
+        .brand-text h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem; font-weight:800; color:var(--white); letter-spacing:-0.3px; line-height:1.1; }
+        .brand-text span { font-size:0.72rem; color:rgba(255,255,255,0.45); letter-spacing:1.5px; text-transform:uppercase; font-weight:500; }
+        .hero-text h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(2rem,3.5vw,3rem); font-weight:800; color:var(--white); line-height:1.15; letter-spacing:-1px; margin-bottom:1.25rem; }
+        .hero-text h2 .highlight { background:linear-gradient(135deg,var(--cyan-light),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-text p { color:rgba(255,255,255,0.5); font-size:1rem; font-weight:300; line-height:1.7; max-width:400px; margin-bottom:2.5rem; }
+        .stats-row { display:flex; gap:2rem; margin-top:3rem; }
+        .stat-item { border-left:2px solid rgba(0,180,216,0.4); padding-left:1rem; }
+        .stat-item .num { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.6rem; font-weight:800; color:var(--cyan-light); line-height:1; }
+        .stat-item .lbl { font-size:0.72rem; color:rgba(255,255,255,0.4); letter-spacing:0.5px; margin-top:2px; }
+        .illustration { position:absolute; bottom:0; right:0; width:300px; height:340px; display:flex; align-items:flex-end; justify-content:center; gap:20px; pointer-events:none; }
+        .doc-figure { width:110px; height:260px; border-radius:55px 55px 0 0; position:relative; animation:docFloat 4s ease-in-out infinite; }
+        .doc-figure.doc1 { background:linear-gradient(180deg,rgba(0,180,216,0.25) 0%,rgba(0,180,216,0.05) 100%); border:1px solid rgba(0,180,216,0.3); animation-delay:0s; }
+        .doc-figure.doc2 { background:linear-gradient(180deg,rgba(21,101,192,0.3) 0%,rgba(21,101,192,0.05) 100%); border:1px solid rgba(21,101,192,0.4); animation-delay:-2s; width:100px; height:240px; }
+        .doc-head { width:50px; height:50px; border-radius:50%; position:absolute; top:-25px; left:50%; transform:translateX(-50%); }
+        .doc1 .doc-head { background:rgba(0,180,216,0.4); border:1px solid rgba(0,180,216,0.5); }
+        .doc2 .doc-head { background:rgba(21,101,192,0.45); border:1px solid rgba(21,101,192,0.6); }
+        @keyframes docFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        .stethoscope-ring { position:absolute; width:180px; height:180px; border-radius:50%; border:1px solid rgba(0,180,216,0.2); top:50%; left:50%; transform:translate(-50%,-50%); animation:ringPulse 3s ease-in-out infinite; }
+        .stethoscope-ring::after { content:''; position:absolute; inset:20px; border-radius:50%; border:1px solid rgba(0,180,216,0.15); }
+        @keyframes ringPulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6} 50%{transform:translate(-50%,-50%) scale(1.08);opacity:1} }
+        .feature-pills { display:flex; flex-wrap:wrap; gap:0.6rem; }
+        .pill { display:flex; align-items:center; gap:6px; background:var(--glass); border:1px solid var(--glass-border); border-radius:50px; padding:0.4rem 0.9rem; font-size:0.78rem; color:rgba(255,255,255,0.7); font-weight:500; backdrop-filter:blur(8px); }
+        .pill i { color:var(--cyan); font-size:0.75rem; }
+        .v-divider { width:1px; background:linear-gradient(to bottom,transparent,rgba(255,255,255,0.1) 30%,rgba(255,255,255,0.1) 70%,transparent); margin:2rem 0; flex-shrink:0; }
+        .right-panel { width:480px; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:2rem; }
+        .login-card { width:100%; max-width:400px; background:rgba(255,255,255,0.96); border-radius:28px; padding:2.75rem 2.5rem; box-shadow:0 32px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.1),inset 0 1px 0 rgba(255,255,255,0.9); animation:cardIn 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+        @keyframes cardIn { from{opacity:0;transform:translateY(30px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        .card-header-top { text-align:center; margin-bottom:2rem; }
+        .card-logo { width:56px; height:56px; background:linear-gradient(135deg,#1565C0,#00B4D8); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; box-shadow:0 8px 24px rgba(21,101,192,0.35); }
+        .card-header-top h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.5rem; font-weight:800; color:#0A1628; letter-spacing:-0.5px; }
+        .card-header-top p { font-size:0.84rem; color:#8B9AB3; margin-top:4px; }
+        .field-group { margin-bottom:1.1rem; }
+        .field-label { display:block; font-size:0.78rem; font-weight:600; color:#2C3E6A; margin-bottom:0.4rem; }
+        .field-wrap { position:relative; display:flex; align-items:center; }
+        .field-icon { position:absolute; left:14px; color:#8B9AB3; font-size:0.95rem; pointer-events:none; }
+        .field-input { width:100%; padding:0.75rem 0.9rem 0.75rem 2.5rem; border:1.5px solid #E2E8F5; border-radius:12px; font-size:0.88rem; font-family:'DM Sans',sans-serif; color:#1A2B4A; background:#F7F9FC; transition:all 0.2s ease; outline:none; }
+        .field-input:focus { border-color:#1565C0; background:#fff; box-shadow:0 0 0 3px rgba(21,101,192,0.12); }
+        .field-input::placeholder { color:#B0BCCC; }
+        .toggle-pwd { position:absolute; right:12px; background:none; border:none; color:#8B9AB3; cursor:pointer; padding:4px; font-size:0.95rem; transition:color 0.15s; }
+        .toggle-pwd:hover { color:#1565C0; }
+        .btn-login { width:100%; padding:0.85rem; background:linear-gradient(135deg,#1565C0 0%,#1E88E5 100%); border:none; border-radius:12px; color:white; font-family:'Plus Jakarta Sans',sans-serif; font-size:0.95rem; font-weight:700; cursor:pointer; transition:all 0.2s ease; box-shadow:0 6px 20px rgba(21,101,192,0.35); margin-top:0.5rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .btn-login:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(21,101,192,0.45); }
+        .btn-login:active { transform:translateY(0); }
+        .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .alert-error { background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; color:#DC2626; padding:0.7rem 0.9rem; font-size:0.82rem; font-weight:500; margin-bottom:1rem; display:none; align-items:center; gap:8px; }
+        .demo-box { margin-top:1.25rem; background:#F0F6FF; border:1px solid #BFDBFE; border-radius:12px; padding:0.9rem 1rem; font-size:0.78rem; color:#1E40AF; }
+        .demo-box strong { display:block; margin-bottom:6px; font-size:0.76rem; letter-spacing:0.3px; }
+        .demo-row { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+        .demo-row code { background:rgba(30,64,175,0.1); padding:2px 6px; border-radius:5px; font-size:0.74rem; color:#1E40AF; }
+        .secure-note { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:1.1rem; font-size:0.75rem; color:#9BABC4; }
+        .secure-note i { color:#10B981; }
+        @media (max-width:900px) { .left-panel{display:none} .right-panel{width:100%} }
     </style>
 </head>
 <body>
-<div class="login-card">
-    <div class="text-center mb-4">
-        <div class="logo-circle"><i class="bi bi-hospital-fill text-white" style="font-size:1.8rem"></i></div>
-        <h4 class="mb-0" style="font-weight:700">HealthAnalytics IPS</h4>
-        <p class="text-muted small">Plataforma de Analítica Clínica Inteligente</p>
-    </div>
-    <div id="alertError" class="alert alert-danger d-none"></div>
-    <form id="loginForm">
-        <div class="mb-3">
-            <label class="form-label small" style="font-weight:600">Correo Electrónico</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope text-muted"></i></span>
-                <input type="email" id="email" class="form-control" placeholder="admin@healthanalytics.com" required>
+<div class="bg-layer"></div>
+<div class="grid-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="layout">
+    <div class="left-panel">
+        <div class="brand">
+            <div class="brand-icon"><i class="bi bi-hospital-fill" style="color:white"></i></div>
+            <div class="brand-text">
+                <h1>HealthAnalytics IPS</h1>
+                <span>Plataforma Clínica Inteligente</span>
             </div>
         </div>
-        <div class="mb-4">
-            <label class="form-label small" style="font-weight:600">Contraseña</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
-                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
-                <button class="btn btn-outline-secondary" type="button" id="togglePwd"><i class="bi bi-eye"></i></button>
+        <div class="hero-text">
+            <h2>Analítica clínica<br>para el <span class="highlight">sector salud</span><br>del futuro</h2>
+            <p>Procesa datos clínicos, detecta pacientes en riesgo y toma decisiones basadas en inteligencia artificial en tiempo real.</p>
+            <div class="feature-pills">
+                <div class="pill"><i class="bi bi-cpu-fill"></i> Machine Learning</div>
+                <div class="pill"><i class="bi bi-arrow-repeat"></i> ETL Automático</div>
+                <div class="pill"><i class="bi bi-shield-check"></i> JWT Seguro</div>
+                <div class="pill"><i class="bi bi-graph-up-arrow"></i> Dashboard Clínico</div>
+                <div class="pill"><i class="bi bi-bell-fill"></i> Alertas en Tiempo Real</div>
             </div>
         </div>
-        <button type="submit" class="btn btn-login btn-primary w-100 text-white" id="btnLogin">
-            <span id="loginText"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión</span>
-            <span id="loginSpinner" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Autenticando...</span>
-        </button>
-    </form>
-    <div class="alert-demo mt-4 p-3">
-        <strong><i class="bi bi-info-circle me-1"></i>Credenciales demo:</strong><br>
-        <code>admin@healthanalytics.com</code> / <code>Admin1234!</code>
+        <div class="stats-row">
+            <div class="stat-item"><div class="num">1800+</div><div class="lbl">Registros procesados</div></div>
+            <div class="stat-item"><div class="num">3</div><div class="lbl">Modelos ML disponibles</div></div>
+            <div class="stat-item"><div class="num">99%</div><div class="lbl">Precisión ETL</div></div>
+        </div>
+        <div class="illustration">
+            <div class="stethoscope-ring"></div>
+            <div class="doc-figure doc1"><div class="doc-head"></div></div>
+            <div class="doc-figure doc2"><div class="doc-head"></div></div>
+        </div>
     </div>
-    <p class="text-center text-muted small mt-3 mb-0"><i class="bi bi-shield-check me-1"></i>Conexión segura con JWT</p>
+
+    <div class="v-divider"></div>
+
+    <div class="right-panel">
+        <div class="login-card">
+            <div class="card-header-top">
+                <div class="card-logo"><i class="bi bi-hospital-fill" style="color:white;font-size:1.4rem"></i></div>
+                <h3>¡Bienvenido!</h3>
+                <p>Ingresa tus credenciales para continuar</p>
+            </div>
+            <div class="alert-error" id="alertError">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span id="alertMsg">Error de autenticación</span>
+            </div>
+            <form id="loginForm">
+                <div class="field-group">
+                    <label class="field-label">Correo Electrónico</label>
+                    <div class="field-wrap">
+                        <i class="bi bi-envelope field-icon"></i>
+                        <input type="email" id="email" class="field-input" placeholder="admin@healthanalytics.com" required>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Contraseña</label>
+                    <div class="field-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input type="password" id="password" class="field-input" placeholder="••••••••" required>
+                        <button type="button" class="toggle-pwd" id="togglePwd">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login" id="btnLogin">
+                    <div class="spinner" id="loginSpinner"></div>
+                    <i class="bi bi-box-arrow-in-right" id="loginIcon"></i>
+                    <span id="loginText">Iniciar Sesión</span>
+                </button>
+            </form>
+            <div class="demo-box">
+                <strong><i class="bi bi-info-circle me-1"></i> Credenciales de demo</strong>
+                <div class="demo-row"><span>Admin</span><code>Admin1234!</code></div>
+                <div class="demo-row"><span>Médico</span><code>Medico1234!</code></div>
+                <div class="demo-row"><span>Analista</span><code>Analista1234!</code></div>
+            </div>
+            <div class="secure-note">
+                <i class="bi bi-shield-fill-check"></i> Conexión cifrada con JWT · SSL
+            </div>
+        </div>
+    </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     if (localStorage.getItem('access_token')) window.location.href = '/';
     document.getElementById('togglePwd').addEventListener('click', () => {
-        const p = document.getElementById('password'), i = document.querySelector('#togglePwd i');
+        const p = document.getElementById('password');
+        const icon = document.getElementById('eyeIcon');
         p.type = p.type === 'password' ? 'text' : 'password';
-        i.className = p.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        icon.className = p.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
     });
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const errBox = document.getElementById('alertError');
-        document.getElementById('loginText').classList.add('d-none');
-        document.getElementById('loginSpinner').classList.remove('d-none');
-        errBox.classList.add('d-none');
+        const spinner = document.getElementById('loginSpinner');
+        const loginIcon = document.getElementById('loginIcon');
+        const loginText = document.getElementById('loginText');
+        errBox.style.display = 'none';
+        spinner.style.display = 'block';
+        loginIcon.style.display = 'none';
+        loginText.textContent = 'Autenticando...';
+        document.getElementById('btnLogin').disabled = true;
         try {
-            const res = await fetch('/api/auth/login/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password}) });
+            const res = await fetch('/api/auth/login/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
             const data = await res.json();
             if (!res.ok) throw new Error(data.detail || 'Credenciales incorrectas');
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
-            window.location.href = '/';
+            loginText.textContent = '¡Accediendo!';
+            setTimeout(() => window.location.href = '/', 400);
         } catch (err) {
-            errBox.textContent = err.message;
-            errBox.classList.remove('d-none');
-        } finally {
-            document.getElementById('loginText').classList.remove('d-none');
-            document.getElementById('loginSpinner').classList.add('d-none');
+            document.getElementById('alertMsg').textContent = err.message;
+            errBox.style.display = 'flex';
+            spinner.style.display = 'none';
+            loginIcon.style.display = '';
+            loginText.textContent = 'Iniciar Sesión';
+            document.getElementById('btnLogin').disabled = false;
         }
     });
 </script>

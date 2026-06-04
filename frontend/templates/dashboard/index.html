@@ -5,91 +5,170 @@
 
 {% block extra_css %}
 <style>
-    .kpi-value { font-size: 2rem; font-weight: 700; line-height: 1; }
-    .kpi-label { font-size: .8rem; color: #6c757d; margin-top: .25rem; }
-    .chart-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); padding: 1.25rem; }
-    .etl-badge { padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+    .dash-hero { background:linear-gradient(135deg,#0D2E6E 0%,#1565C0 50%,#0891B2 100%); border-radius:20px; padding:2rem 2.5rem; margin-bottom:1.75rem; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(13,46,110,0.35); }
+    .dash-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(0,180,216,0.25) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(255,255,255,0.07) 0%,transparent 50%); }
+    .hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px); background-size:40px 40px; }
+    .dash-hero-content { position:relative; z-index:1; }
+    .dash-hero h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.6rem; font-weight:800; color:#fff; margin:0; letter-spacing:-0.5px; }
+    .dash-hero p { color:rgba(255,255,255,0.6); font-size:0.88rem; margin:0.3rem 0 0; }
+    .hero-badges { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1.25rem; }
+    .hero-badge { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:50px; padding:0.35rem 0.9rem; font-size:0.76rem; color:rgba(255,255,255,0.85); font-weight:500; display:flex; align-items:center; gap:5px; }
+    .hero-badge i { color:#90E0EF; }
+    .hero-pulse { display:flex; align-items:center; gap:8px; background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); border-radius:50px; padding:0.35rem 0.9rem; font-size:0.76rem; color:#6EE7B7; font-weight:600; }
+    .pulse-dot { width:7px; height:7px; background:#10B981; border-radius:50%; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 50%{opacity:.7;box-shadow:0 0 0 5px rgba(16,185,129,0)} }
+    .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:1.75rem; }
+    @media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+    .kpi-v2 { background:#fff; border-radius:16px; padding:1.25rem 1.25rem 1rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; position:relative; overflow:hidden; transition:transform .2s ease,box-shadow .2s ease; cursor:default; }
+    .kpi-v2:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.12); }
+    .kpi-v2 .kpi-accent { position:absolute; top:0; left:0; right:0; height:4px; border-radius:16px 16px 0 0; }
+    .kpi-v2 .kpi-bg-icon { position:absolute; right:-8px; bottom:-8px; font-size:4rem; opacity:0.06; line-height:1; }
+    .kpi-v2 .kpi-icon-box { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.9rem; }
+    .kpi-v2 .kpi-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.85rem; font-weight:800; letter-spacing:-1.5px; line-height:1; margin-bottom:3px; }
+    .kpi-v2 .kpi-lbl { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:#8B9AB3; }
+    .kpi-v2 .kpi-sub { font-size:0.72rem; color:#10B981; font-weight:500; margin-top:4px; display:flex; align-items:center; gap:3px; }
+    .chart-v2 { background:#fff; border-radius:18px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; height:100%; }
+    .chart-v2-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; padding-bottom:0.85rem; border-bottom:1px solid #F1F5FD; }
+    .chart-v2-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; font-weight:700; color:#1A2B4A; display:flex; align-items:center; gap:8px; }
+    .chart-v2-title .ct-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; }
+    .chart-badge { font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:50px; }
+    .bottom-card { background:#fff; border-radius:18px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #E8EEF8; overflow:hidden; }
+    .bottom-card-header { padding:1.1rem 1.5rem; border-bottom:1px solid #F1F5FD; display:flex; align-items:center; justify-content:space-between; }
+    .bottom-card-header h6 { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.88rem; font-weight:700; color:#1A2B4A; margin:0; display:flex; align-items:center; gap:8px; }
+    .table-dash { font-size:0.82rem; margin:0; width:100%; border-collapse:collapse; }
+    .table-dash thead th { background:#F8FAFF; color:#8B9AB3; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; padding:0.65rem 1rem; border-bottom:1px solid #EEF2FB; }
+    .table-dash tbody td { padding:0.7rem 1rem; vertical-align:middle; border-bottom:1px solid #F5F7FD; color:#2C3E6A; }
+    .table-dash tbody tr:last-child td { border-bottom:none; }
+    .table-dash tbody tr:hover { background:#F8FAFF; }
+    .section-lbl { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#8B9AB3; margin-bottom:0.75rem; padding-left:2px; }
+    .rbadge { display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:700; padding:2px 9px; border-radius:50px; }
+    .rbadge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .rbadge-bajo   { background:#ECFDF5; color:#059669; }
+    .rbadge-medio  { background:#FFFBEB; color:#D97706; }
+    .rbadge-alto   { background:#FFF7ED; color:#EA580C; }
+    .rbadge-critico{ background:#FEF2F2; color:#DC2626; animation:blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .etl-status { font-size:0.71rem; font-weight:700; padding:2px 9px; border-radius:50px; display:inline-block; }
+    .etl-ok  { background:#ECFDF5; color:#059669; }
+    .etl-err { background:#FEF2F2; color:#DC2626; }
+    .etl-proc{ background:#EFF6FF; color:#2563EB; }
+    .kpi-skeleton { background:linear-gradient(90deg,#f0f4ff 25%,#e4ecff 50%,#f0f4ff 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:8px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- KPI CARDS -->
-<div class="row g-3 mb-4" id="kpiRow">
-    <!-- Filled by JS -->
-    <div class="col-12 text-center py-5" id="kpiLoading">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Cargando indicadores...</p>
+
+<div class="dash-hero mb-4">
+    <div class="hero-grid"></div>
+    <div class="dash-hero-content d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <h2>Dashboard Clínico</h2>
+            <p id="heroDate">Plataforma de Analítica Médica Inteligente</p>
+            <div class="hero-badges">
+                <div class="hero-pulse"><div class="pulse-dot"></div>Sistema en línea</div>
+                <div class="hero-badge"><i class="bi bi-cpu-fill"></i> ML Activo</div>
+                <div class="hero-badge"><i class="bi bi-database-fill"></i> ETL Listo</div>
+                <div class="hero-badge"><i class="bi bi-shield-fill-check"></i> JWT Seguro</div>
+            </div>
+        </div>
+        <div class="text-end" style="z-index:1">
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Bienvenido</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:700;color:#fff" id="heroUser">—</div>
+            <div style="font-size:0.76rem;color:rgba(255,255,255,0.5)" id="heroRole">—</div>
+        </div>
     </div>
 </div>
 
-<!-- CHARTS ROW -->
-<div class="row g-3 mb-4">
-    <div class="col-lg-5">
-        <div class="chart-card h-100">
-            <h6 class="fw-semibold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribución de Riesgo</h6>
-            <canvas id="chartRiesgo" height="220"></canvas>
+<div class="section-lbl">Indicadores Clave</div>
+<div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+    <div class="kpi-v2"><div class="kpi-accent" style="background:#E8EEF8"></div><div class="kpi-skeleton mb-2" style="width:40px;height:40px;border-radius:10px"></div><div class="kpi-skeleton mb-1" style="width:60%;height:24px"></div><div class="kpi-skeleton" style="width:80%;height:12px"></div></div>
+</div>
+
+<div class="section-lbl">Distribución Clínica</div>
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <div class="chart-v2">
+            <div class="chart-v2-header">
+                <div class="chart-v2-title"><div class="ct-icon" style="background:#EFF6FF"><i class="bi bi-pie-chart-fill" style="color:#2563EB"></i></div>Distribución de Riesgo</div>
+                <span class="chart-badge" style="background:#EFF6FF;color:#2563EB">En vivo</span>
+            </div>
+            <canvas id="chartRiesgo" height="200"></canvas>
         </div>
     </div>
-    <div class="col-lg-7">
-        <div class="chart-card h-100">
-            <h6 class="fw-semibold mb-3"><i class="bi bi-bar-chart me-2 text-primary"></i>Riesgo por Grupo de Edad</h6>
-            <canvas id="chartEdad" height="220"></canvas>
+    <div class="col-lg-8">
+        <div class="chart-v2">
+            <div class="chart-v2-header">
+                <div class="chart-v2-title"><div class="ct-icon" style="background:#F0FDF4"><i class="bi bi-bar-chart-fill" style="color:#059669"></i></div>Riesgo por Grupo de Edad</div>
+                <span class="chart-badge" style="background:#F0FDF4;color:#059669">Apilado</span>
+            </div>
+            <canvas id="chartEdad" height="200"></canvas>
         </div>
     </div>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-lg-6">
-        <div class="chart-card h-100">
-            <h6 class="fw-semibold mb-3"><i class="bi bi-gender-ambiguous me-2 text-primary"></i>Distribución por Sexo</h6>
-            <canvas id="chartSexo" height="200"></canvas>
+        <div class="chart-v2">
+            <div class="chart-v2-header">
+                <div class="chart-v2-title"><div class="ct-icon" style="background:#FDF4FF"><i class="bi bi-gender-ambiguous" style="color:#9333EA"></i></div>Distribución por Sexo</div>
+            </div>
+            <canvas id="chartSexo" height="180"></canvas>
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="chart-card h-100">
-            <h6 class="fw-semibold mb-3"><i class="bi bi-activity me-2 text-primary"></i>Distribución por IMC</h6>
-            <canvas id="chartImc" height="200"></canvas>
+        <div class="chart-v2">
+            <div class="chart-v2-header">
+                <div class="chart-v2-title"><div class="ct-icon" style="background:#FFF7ED"><i class="bi bi-activity" style="color:#EA580C"></i></div>Distribución por IMC</div>
+            </div>
+            <canvas id="chartImc" height="180"></canvas>
         </div>
     </div>
 </div>
 
-<!-- BOTTOM ROW -->
+<div class="section-lbl">Alertas y Actividad Reciente</div>
 <div class="row g-3">
     <div class="col-lg-6">
-        <div class="chart-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-semibold mb-0"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Pacientes Críticos</h6>
-                <a href="/pacientes/?critico=true" class="btn btn-sm btn-outline-danger">Ver todos</a>
+        <div class="bottom-card">
+            <div class="bottom-card-header">
+                <h6><span style="width:26px;height:26px;background:#FEF2F2;border-radius:7px;display:inline-flex;align-items:center;justify-content:center"><i class="bi bi-exclamation-triangle-fill" style="color:#DC2626;font-size:.8rem"></i></span>Pacientes Críticos</h6>
+                <a href="/pacientes/?critico=true" style="font-size:0.76rem;color:#1565C0;text-decoration:none;font-weight:600">Ver todos →</a>
             </div>
-            <div id="tablaCriticos" class="table-responsive" style="max-height:300px;overflow-y:auto">
-                <div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Cargando...</div>
+            <div id="tablaCriticos" style="max-height:280px;overflow-y:auto">
+                <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>
             </div>
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="chart-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-semibold mb-0"><i class="bi bi-clock-history me-2 text-success"></i>Últimos Procesos ETL</h6>
-                <a href="/etl/" class="btn btn-sm btn-outline-success">Ejecutar ETL</a>
+        <div class="bottom-card">
+            <div class="bottom-card-header">
+                <h6><span style="width:26px;height:26px;background:#F0FDF4;border-radius:7px;display:inline-flex;align-items:center;justify-content:center"><i class="bi bi-clock-history" style="color:#059669;font-size:.8rem"></i></span>Últimos Procesos ETL</h6>
+                <a href="/etl/" style="font-size:0.76rem;color:#059669;text-decoration:none;font-weight:600">Ejecutar ETL →</a>
             </div>
             <div id="tablaEtl">
-                <div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Cargando...</div>
+                <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success"></div></div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <script>
+const _u = (() => { try { return JSON.parse(localStorage.getItem('user')||'{}'); } catch { return {}; } })();
+document.getElementById('heroUser').textContent = `${_u.nombres||''} ${_u.apellidos||''}`.trim() || '—';
+document.getElementById('heroRole').textContent = _u.role || '—';
+document.getElementById('heroDate').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-
-
-
-
-
-
-
+const RISK_COLORS_DASH = { 'Bajo':'#10B981','Medio':'#F59E0B','Alto':'#F97316','Crítico':'#EF4444' };
 let chartRiesgo, chartEdad, chartSexo, chartImc;
 
 async function loadDashboard() {
@@ -102,7 +181,6 @@ async function loadDashboard() {
             apiCall('/analytics/pacientes-criticos/'),
             apiCall('/etl/historial/'),
         ]);
-
         renderKPIs(kpis);
         renderChartRiesgo(kpis.distribucion_riesgo || {});
         renderChartEdad(edadData || []);
@@ -110,145 +188,99 @@ async function loadDashboard() {
         renderChartImc(imcData || []);
         renderCriticos(criticos);
         renderEtlHistory(etlHist);
-    } catch (err) {
-        showToast('Error cargando dashboard: ' + err.message, 'danger');
-    }
+    } catch (err) { showToast('Error cargando dashboard: ' + err.message, 'danger'); }
 }
 
 function renderKPIs(d) {
-    document.getElementById('kpiLoading').remove();
     const kpis = [
-        { label: 'Total Pacientes', value: d.total_pacientes || 0, icon: 'people-fill', color: '#0d6efd', bg: '#e7f0ff' },
-        { label: 'Pacientes Críticos', value: d.pacientes_criticos || 0, icon: 'heart-pulse-fill', color: '#dc3545', bg: '#fde8ea' },
-        { label: 'Hipertensos', value: d.pacientes_hipertensos || 0, icon: 'droplet-fill', color: '#fd7e14', bg: '#fff3e0' },
-        { label: 'Diabéticos', value: d.pacientes_diabeticos || 0, icon: 'capsule', color: '#6f42c1', bg: '#f0ebff' },
-        { label: 'Fumadores', value: d.pacientes_fumadores || 0, icon: 'wind', color: '#0dcaf0', bg: '#e0f7fa' },
-        { label: 'Promedio IMC', value: d.promedio_imc || 0, icon: 'person-fill', color: '#198754', bg: '#e8f5e9' },
+        { label:'Total Pacientes',    value:d.total_pacientes||0,    icon:'people-fill',      color:'#2563EB', bg:'#EFF6FF', accent:'#2563EB', sub:'' },
+        { label:'Pacientes Críticos', value:d.pacientes_criticos||0, icon:'heart-pulse-fill', color:'#DC2626', bg:'#FEF2F2', accent:'#DC2626', sub:d.porcentaje_criticos+'%' },
+        { label:'Hipertensos',        value:d.pacientes_hipertensos||0,icon:'droplet-fill',   color:'#EA580C', bg:'#FFF7ED', accent:'#EA580C', sub:d.porcentaje_hipertensos+'%' },
+        { label:'Diabéticos',         value:d.pacientes_diabeticos||0, icon:'capsule',        color:'#9333EA', bg:'#FDF4FF', accent:'#9333EA', sub:d.porcentaje_diabeticos+'%' },
+        { label:'Fumadores',          value:d.pacientes_fumadores||0,  icon:'wind',           color:'#0891B2', bg:'#ECFEFF', accent:'#0891B2', sub:'' },
+        { label:'Promedio IMC',       value:d.promedio_imc||0,         icon:'person-fill',    color:'#059669', bg:'#F0FDF4', accent:'#059669', sub:'' },
     ];
-    const row = document.getElementById('kpiRow');
-    kpis.forEach(k => {
-        const col = document.createElement('div');
-        col.className = 'col-xl-2 col-lg-4 col-md-4 col-6';
-        col.innerHTML = `
-            <div class="kpi-card card p-3">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div>
-                        <div class="kpi-value" style="color:${k.color}">${k.value.toLocaleString('es-CO')}</div>
-                        <div class="kpi-label">${k.label}</div>
-                    </div>
-                    <div class="kpi-icon" style="background:${k.bg}">
-                        <i class="bi bi-${k.icon}" style="color:${k.color}"></i>
-                    </div>
-                </div>
-            </div>`;
-        row.appendChild(col);
-    });
+    document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+        <div class="kpi-v2">
+            <div class="kpi-accent" style="background:${k.accent}"></div>
+            <div class="kpi-bg-icon"><i class="bi bi-${k.icon}" style="color:${k.color}"></i></div>
+            <div class="kpi-icon-box" style="background:${k.bg}"><i class="bi bi-${k.icon}" style="color:${k.color}"></i></div>
+            <div class="kpi-num" style="color:${k.color}">${typeof k.value==='number'?k.value.toLocaleString('es-CO'):k.value}</div>
+            <div class="kpi-lbl">${k.label}</div>
+            ${k.sub?`<div class="kpi-sub"><i class="bi bi-arrow-up-right" style="font-size:.65rem"></i>${k.sub} del total</div>`:''}
+        </div>`).join('');
 }
 
 function renderChartRiesgo(dist) {
-    const labels = Object.keys(dist);
-    const values = Object.values(dist);
     if (chartRiesgo) chartRiesgo.destroy();
+    const labels = Object.keys(dist), values = Object.values(dist);
     chartRiesgo = new Chart(document.getElementById('chartRiesgo'), {
-        type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{ data: values, backgroundColor: labels.map(l => RISK_COLORS[l] || '#adb5bd'), borderWidth: 3 }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+        type:'doughnut',
+        data:{ labels, datasets:[{ data:values, backgroundColor:labels.map(l=>RISK_COLORS_DASH[l]||'#adb5bd'), borderWidth:4, borderColor:'#fff', hoverBorderWidth:0 }] },
+        options:{ cutout:'70%', plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, padding:16, usePointStyle:true, pointStyleWidth:8 } } } }
     });
 }
 
 function renderChartEdad(data) {
     if (chartEdad) chartEdad.destroy();
     chartEdad = new Chart(document.getElementById('chartEdad'), {
-        type: 'bar',
-        data: {
-            labels: data.map(d => d.grupo_edad),
-            datasets: [
-                { label: 'Bajo', data: data.map(d => d.bajo), backgroundColor: '#198754' },
-                { label: 'Medio', data: data.map(d => d.medio), backgroundColor: '#ffc107' },
-                { label: 'Alto', data: data.map(d => d.alto), backgroundColor: '#fd7e14' },
-                { label: 'Crítico', data: data.map(d => d.critico), backgroundColor: '#dc3545' },
-            ]
-        },
-        options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } }
+        type:'bar',
+        data:{ labels:data.map(d=>d.grupo_edad), datasets:[
+            { label:'Bajo',    data:data.map(d=>d.bajo),    backgroundColor:'#10B981', borderRadius:4 },
+            { label:'Medio',   data:data.map(d=>d.medio),   backgroundColor:'#F59E0B', borderRadius:4 },
+            { label:'Alto',    data:data.map(d=>d.alto),    backgroundColor:'#F97316', borderRadius:4 },
+            { label:'Crítico', data:data.map(d=>d.critico), backgroundColor:'#EF4444', borderRadius:4 },
+        ]},
+        options:{ scales:{ x:{stacked:true,grid:{display:false}}, y:{stacked:true,grid:{color:'#F1F5FD'}} }, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
     });
 }
 
 function renderChartSexo(data) {
     if (chartSexo) chartSexo.destroy();
-    const labels = data.map(d => d.sexo === 'M' ? 'Masculino' : 'Femenino');
     chartSexo = new Chart(document.getElementById('chartSexo'), {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [
-                { label: 'Total', data: data.map(d => d.total), backgroundColor: ['#0d6efd', '#e91e8c'] },
-                { label: 'Críticos', data: data.map(d => d.criticos), backgroundColor: ['#dc3545', '#ff6b9d'] },
-            ]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
+        type:'bar',
+        data:{ labels:data.map(d=>d.sexo==='M'?'Masculino':'Femenino'), datasets:[
+            { label:'Total',    data:data.map(d=>d.total),   backgroundColor:['#3B82F6','#EC4899'], borderRadius:6 },
+            { label:'Críticos', data:data.map(d=>d.criticos),backgroundColor:['#1D4ED8','#BE185D'], borderRadius:6 },
+        ]},
+        options:{ scales:{ x:{grid:{display:false}}, y:{grid:{color:'#F1F5FD'}} }, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
     });
 }
 
 function renderChartImc(data) {
     if (chartImc) chartImc.destroy();
-    const colors = { 'Bajo peso': '#0dcaf0', 'Normal': '#198754', 'Sobrepeso': '#ffc107', 'Obesidad': '#dc3545' };
+    const colors = { 'Bajo peso':'#06B6D4','Normal':'#10B981','Sobrepeso':'#F59E0B','Obesidad':'#EF4444' };
     chartImc = new Chart(document.getElementById('chartImc'), {
-        type: 'pie',
-        data: {
-            labels: data.map(d => d.imc_clasificacion),
-            datasets: [{ data: data.map(d => d.total), backgroundColor: data.map(d => colors[d.imc_clasificacion] || '#adb5bd') }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
+        type:'pie',
+        data:{ labels:data.map(d=>d.imc_clasificacion), datasets:[{ data:data.map(d=>d.total), backgroundColor:data.map(d=>colors[d.imc_clasificacion]||'#adb5bd'), borderWidth:4, borderColor:'#fff' }] },
+        options:{ plugins:{ legend:{ position:'bottom', labels:{ font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
     });
 }
 
 function renderCriticos(data) {
-    const container = document.getElementById('tablaCriticos');
-    if (!data || !data.pacientes || data.pacientes.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-3">No hay pacientes críticos</p>';
-        return;
-    }
-    let html = `<table class="table table-sm table-hover mb-0">
-        <thead class="table-light"><tr>
-            <th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th>
-        </tr></thead><tbody>`;
-    data.pacientes.slice(0, 8).forEach(p => {
-        html += `<tr>
-            <td><strong>${p.nombres} ${p.apellidos}</strong><br><small class="text-muted">${p.edad} años</small></td>
-            <td><span class="badge ${p.presion_sistolica > 180 ? 'bg-danger' : 'bg-warning text-dark'}">${p.presion_sistolica}</span></td>
-            <td><span class="badge ${p.glucosa > 300 ? 'bg-danger' : 'bg-secondary'}">${p.glucosa?.toFixed(1)}</span></td>
-            <td><span class="badge ${p.saturacion_oxigeno < 85 ? 'bg-danger' : 'bg-success'}">${p.saturacion_oxigeno?.toFixed(1)}%</span></td>
-        </tr>`;
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
+    const c = document.getElementById('tablaCriticos');
+    if (!data?.pacientes?.length) { c.innerHTML='<p class="text-muted text-center py-4" style="font-size:.84rem"><i class="bi bi-check-circle-fill text-success me-2"></i>Sin pacientes críticos</p>'; return; }
+    c.innerHTML = `<table class="table-dash"><thead><tr><th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th></tr></thead><tbody>`
+        + data.pacientes.slice(0,8).map(p=>`<tr>
+            <td><strong style="color:#1A2B4A">${p.nombres} ${p.apellidos}</strong><br><small class="text-muted">${p.edad} años · ${p.diagnostico_preliminar}</small></td>
+            <td><span class="rbadge ${p.presion_sistolica>180?'rbadge-critico':'rbadge-medio'}">${p.presion_sistolica} mmHg</span></td>
+            <td><span class="rbadge ${p.glucosa>300?'rbadge-critico':'rbadge-bajo'}">${(p.glucosa||0).toFixed(1)}</span></td>
+            <td><span class="rbadge ${p.saturacion_oxigeno<85?'rbadge-critico':'rbadge-bajo'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td>
+        </tr>`).join('') + '</tbody></table>';
 }
 
 function renderEtlHistory(data) {
-    const container = document.getElementById('tablaEtl');
-    if (!data || data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted py-3">Sin procesos ETL ejecutados</p>';
-        return;
-    }
-    const stateColors = { 'COMPLETADO': 'success', 'ERROR': 'danger', 'EN_PROCESO': 'warning', 'PENDIENTE': 'secondary' };
-    let html = `<table class="table table-sm mb-0"><thead class="table-light"><tr>
-        <th>Fecha</th><th>Fuente</th><th>Registros</th><th>Estado</th>
-    </tr></thead><tbody>`;
-    data.slice(0, 6).forEach(e => {
-        const fecha = new Date(e.fecha_inicio).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
-        const color = stateColors[e.estado] || 'secondary';
-        html += `<tr>
-            <td><small>${fecha}</small></td>
-            <td><small>${e.fuente}</small></td>
-            <td><strong>${e.registros_cargados}</strong></td>
-            <td><span class="badge bg-${color}">${e.estado}</span></td>
-        </tr>`;
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
+    const c = document.getElementById('tablaEtl');
+    if (!data?.length) { c.innerHTML='<p class="text-center text-muted py-4" style="font-size:.84rem"><i class="bi bi-arrow-repeat me-2"></i>Sin procesos ETL ejecutados</p>'; return; }
+    const sc = { 'COMPLETADO':'etl-ok','ERROR':'etl-err','EN_PROCESO':'etl-proc','PENDIENTE':'etl-proc' };
+    c.innerHTML = `<table class="table-dash"><thead><tr><th>Fecha</th><th>Fuente</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead><tbody>`
+        + data.slice(0,6).map(e=>`<tr>
+            <td style="white-space:nowrap"><small>${new Date(e.fecha_inicio).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}</small></td>
+            <td><small style="color:#6B778C">${e.fuente}</small></td>
+            <td><strong style="color:#1565C0">${e.registros_cargados}</strong></td>
+            <td><small>${e.tiempo_ejecucion?e.tiempo_ejecucion.toFixed(1)+'s':'—'}</small></td>
+            <td><span class="etl-status ${sc[e.estado]||'etl-proc'}">${e.estado}</span></td>
+        </tr>`).join('') + '</tbody></table>';
 }
 
 loadDashboard();
