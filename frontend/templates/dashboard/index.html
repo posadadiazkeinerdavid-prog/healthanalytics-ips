@@ -6,322 +6,115 @@
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-    /* ── RESET PAGE BG ───────────────────────── */
-    body { background: #0a0f1e !important; }
-    .page-content { background: #0a0f1e; padding: 0 !important; }
-    .topbar { background: rgba(10,15,30,0.95) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; backdrop-filter: blur(12px); }
-    .topbar-title { color: #fff !important; }
-    .topbar-right .topbar-user { color: rgba(255,255,255,0.5) !important; }
-    .status-pill { background: rgba(0,255,150,0.1) !important; color: #00ff96 !important; border: 1px solid rgba(0,255,150,0.2) !important; }
-    .status-pill::before { background: #00ff96 !important; }
+    body { background:#0a0f1e !important; }
+    .page-content { background:#0a0f1e; padding:0 !important; }
+    .topbar { background:rgba(10,15,30,0.95) !important; border-bottom:1px solid rgba(255,255,255,0.06) !important; backdrop-filter:blur(12px); }
+    .topbar-title { color:#fff !important; }
 
-    /* ── HERO ────────────────────────────────── */
-    .d-hero {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #0d1b3e 0%, #0f2d5c 40%, #0a3d6b 70%, #0d2040 100%);
-        padding: 2.5rem 2.75rem 2rem;
-        margin-bottom: 0;
-    }
-    .d-hero::before {
-        content: '';
-        position: absolute; inset: 0;
-        background:
-            radial-gradient(ellipse 70% 100% at 90% 50%, rgba(0,180,216,0.15) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 80% at 10% 100%, rgba(13,110,253,0.2) 0%, transparent 55%);
-    }
-    .d-hero-grid {
-        position: absolute; inset: 0;
-        background-image:
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-        background-size: 44px 44px;
-    }
-    .d-hero-glow {
-        position: absolute;
-        width: 500px; height: 500px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%);
-        top: -150px; right: -100px;
-        pointer-events: none;
-    }
-    .d-hero-content { position: relative; z-index: 2; }
-
-    .hero-eyebrow {
-        display: inline-flex; align-items: center; gap: 7px;
-        background: rgba(0,255,150,0.1);
-        border: 1px solid rgba(0,255,150,0.25);
-        border-radius: 50px;
-        padding: 4px 14px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: #00ff96;
-        letter-spacing: 0.5px;
-        margin-bottom: 1rem;
-    }
-    .hero-eyebrow::before {
-        content: '';
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: #00ff96;
-        animation: blink 2s infinite;
-    }
+    .d-hero { position:relative; overflow:hidden; background:linear-gradient(135deg,#0d1b3e 0%,#0f2d5c 40%,#0a3d6b 70%,#0d2040 100%); padding:2.5rem 2.75rem 2rem; }
+    .d-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 100% at 90% 50%,rgba(0,180,216,0.15) 0%,transparent 60%),radial-gradient(ellipse 50% 80% at 10% 100%,rgba(13,110,253,0.2) 0%,transparent 55%); }
+    .d-hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px); background-size:44px 44px; }
+    .d-hero-glow { position:absolute; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(0,180,216,0.12) 0%,transparent 70%); top:-150px; right:-100px; pointer-events:none; }
+    .d-hero-content { position:relative; z-index:2; }
+    .hero-eyebrow { display:inline-flex; align-items:center; gap:7px; background:rgba(0,255,150,0.1); border:1px solid rgba(0,255,150,0.25); border-radius:50px; padding:4px 14px; font-size:0.72rem; font-weight:600; color:#00ff96; letter-spacing:0.5px; margin-bottom:1rem; }
+    .hero-eyebrow::before { content:''; width:6px; height:6px; border-radius:50%; background:#00ff96; animation:blink 2s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .d-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.8rem,3vw,2.6rem); font-weight:900; color:#fff; line-height:1.1; letter-spacing:-1px; margin-bottom:0.6rem; }
+    .d-hero h1 .grad { background:linear-gradient(135deg,#90e0ef,#00b4d8,#0077b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .d-hero p { color:rgba(255,255,255,0.5); font-size:0.92rem; font-weight:300; line-height:1.6; max-width:520px; margin-bottom:1.5rem; }
+    .hero-tags { display:flex; flex-wrap:wrap; gap:8px; }
+    .hero-tag { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:50px; padding:5px 14px; font-size:0.76rem; color:rgba(255,255,255,0.7); font-weight:500; }
+    .hero-tag i { font-size:0.72rem; color:#00b4d8; }
+    .hero-right { text-align:right; }
+    .hero-right .date-label { font-size:0.7rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
+    .hero-right .user-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.2rem; font-weight:800; color:#fff; }
+    .hero-right .user-role { font-size:0.76rem; color:rgba(255,255,255,0.4); margin-top:2px; }
 
-    .d-hero h1 {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: clamp(1.8rem, 3vw, 2.6rem);
-        font-weight: 900;
-        color: #fff;
-        line-height: 1.1;
-        letter-spacing: -1px;
-        margin-bottom: 0.6rem;
-    }
-    .d-hero h1 .grad {
-        background: linear-gradient(135deg, #90e0ef, #00b4d8, #0077b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .d-hero p {
-        color: rgba(255,255,255,0.5);
-        font-size: 0.92rem;
-        font-weight: 300;
-        line-height: 1.6;
-        max-width: 520px;
-        margin-bottom: 1.5rem;
-    }
+    .dash-body { padding:1.75rem 2.75rem; background:#0a0f1e; min-height:calc(100vh - 220px); }
+    .sec-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,0.25); margin-bottom:0.85rem; padding-left:2px; }
 
-    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-    .hero-tag {
-        display: flex; align-items: center; gap: 6px;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 50px;
-        padding: 5px 14px;
-        font-size: 0.76rem;
-        color: rgba(255,255,255,0.7);
-        font-weight: 500;
-        backdrop-filter: blur(6px);
-        transition: all .2s;
-    }
-    .hero-tag:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .hero-tag i { font-size: 0.72rem; color: #00b4d8; }
-
-    .hero-right {
-        text-align: right;
-    }
-    .hero-right .date-label {
-        font-size: 0.7rem;
-        color: rgba(255,255,255,0.35);
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-bottom: 4px;
-    }
-    .hero-right .user-name {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: #fff;
-        letter-spacing: -0.3px;
-    }
-    .hero-right .user-role {
-        font-size: 0.76rem;
-        color: rgba(255,255,255,0.4);
-        margin-top: 2px;
-    }
-
-    /* ── MAIN CONTENT ────────────────────────── */
-    .dash-body {
-        padding: 1.75rem 2.75rem;
-        background: #0a0f1e;
-        min-height: calc(100vh - 220px);
-    }
-
-    /* ── SECTION LABEL ───────────────────────── */
-    .sec-label {
-        font-size: 0.68rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        color: rgba(255,255,255,0.25);
-        margin-bottom: 0.85rem;
-        padding-left: 2px;
-    }
-
-    /* ── KPI CARDS ───────────────────────────── */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 12px;
-        margin-bottom: 1.75rem;
-    }
+    .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:1.75rem; }
     @media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 
-    .kpi-dark {
-        background: #111827;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 16px;
-        padding: 1.25rem;
-        position: relative;
-        overflow: hidden;
-        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-        cursor: default;
-    }
-    .kpi-dark:hover {
-        transform: translateY(-4px);
-        border-color: rgba(255,255,255,0.15);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-    }
-    .kpi-dark .kpi-glow {
-        position: absolute;
-        top: -20px; right: -20px;
-        width: 100px; height: 100px;
-        border-radius: 50%;
-        filter: blur(30px);
-        opacity: 0.25;
-    }
-    .kpi-dark .kpi-top {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 0.85rem;
-    }
-    .kpi-dark .kpi-icon {
-        width: 36px; height: 36px;
-        border-radius: 9px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1rem;
-    }
-    .kpi-dark .kpi-trend {
-        font-size: 0.68rem;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 50px;
-    }
-    .kpi-dark .kpi-num {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 2rem;
-        font-weight: 900;
-        letter-spacing: -2px;
-        line-height: 1;
-        margin-bottom: 4px;
-    }
-    .kpi-dark .kpi-lbl {
-        font-size: 0.68rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.7px;
-        color: rgba(255,255,255,0.35);
-    }
-    .kpi-dark .kpi-sub {
-        font-size: 0.7rem;
-        font-weight: 500;
-        margin-top: 5px;
-        display: flex; align-items: center; gap: 3px;
-    }
+    .kpi-dark { background:#111827; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:1.25rem; position:relative; overflow:hidden; cursor:pointer; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; user-select:none; }
+    .kpi-dark:hover { transform:translateY(-6px); border-color:rgba(255,255,255,0.2); box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+    .kpi-dark:active { transform:translateY(-2px); }
+    .kpi-dark .kpi-glow { position:absolute; top:-20px; right:-20px; width:100px; height:100px; border-radius:50%; filter:blur(30px); opacity:0.25; }
+    .kpi-dark .kpi-click-hint { position:absolute; bottom:8px; right:10px; font-size:0.6rem; color:rgba(255,255,255,0.2); font-weight:600; letter-spacing:0.5px; text-transform:uppercase; display:flex; align-items:center; gap:3px; transition:color .2s; }
+    .kpi-dark:hover .kpi-click-hint { color:rgba(255,255,255,0.5); }
+    .kpi-dark .kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; }
+    .kpi-dark .kpi-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+    .kpi-dark .kpi-trend { font-size:0.68rem; font-weight:600; padding:2px 8px; border-radius:50px; }
+    .kpi-dark .kpi-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:2rem; font-weight:900; letter-spacing:-2px; line-height:1; margin-bottom:4px; }
+    .kpi-dark .kpi-lbl { font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.7px; color:rgba(255,255,255,0.35); }
 
-    /* ── CHART CARDS ─────────────────────────── */
-    .chart-dark {
-        background: #111827;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 18px;
-        padding: 1.5rem;
-        height: 100%;
-        transition: border-color .2s;
-    }
-    .chart-dark:hover { border-color: rgba(255,255,255,0.12); }
-    .chart-dark-header {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 1.25rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .chart-dark-title {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #fff;
-        display: flex; align-items: center; gap: 8px;
-    }
-    .chart-dark-title .cti {
-        width: 28px; height: 28px;
-        border-radius: 7px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 0.8rem;
-    }
-    .chart-pill {
-        font-size: 0.68rem; font-weight: 600;
-        padding: 3px 10px; border-radius: 50px;
-    }
+    .chart-dark { background:#111827; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:1.5rem; height:100%; transition:border-color .2s; }
+    .chart-dark:hover { border-color:rgba(255,255,255,0.12); }
+    .chart-dark-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .chart-dark-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.88rem; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
+    .chart-dark-title .cti { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; }
+    .chart-pill { font-size:0.68rem; font-weight:600; padding:3px 10px; border-radius:50px; }
 
-    /* ── BOTTOM CARDS ────────────────────────── */
-    .bottom-dark {
-        background: #111827;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 18px;
-        overflow: hidden;
-        transition: border-color .2s;
-    }
-    .bottom-dark:hover { border-color: rgba(255,255,255,0.12); }
-    .bottom-dark-header {
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        display: flex; align-items: center; justify-content: space-between;
-    }
-    .bottom-dark-header h6 {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.85rem; font-weight: 700; color: #fff; margin: 0;
-        display: flex; align-items: center; gap: 8px;
-    }
-    .bottom-dark-header a {
-        font-size: 0.74rem; color: #00b4d8; text-decoration: none; font-weight: 600;
-        transition: color .15s;
-    }
-    .bottom-dark-header a:hover { color: #90e0ef; }
+    .bottom-dark { background:#111827; border:1px solid rgba(255,255,255,0.07); border-radius:18px; overflow:hidden; transition:border-color .2s; }
+    .bottom-dark:hover { border-color:rgba(255,255,255,0.12); }
+    .bottom-dark-header { padding:1rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
+    .bottom-dark-header h6 { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.85rem; font-weight:700; color:#fff; margin:0; display:flex; align-items:center; gap:8px; }
+    .bottom-dark-header a { font-size:0.74rem; color:#00b4d8; text-decoration:none; font-weight:600; }
 
-    /* ── TABLE DARK ──────────────────────────── */
-    .td-table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
-    .td-table thead th {
-        background: rgba(255,255,255,0.03);
-        color: rgba(255,255,255,0.3);
-        font-size: 0.67rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.7px;
-        padding: 0.6rem 1.25rem;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .td-table tbody td {
-        padding: 0.7rem 1.25rem;
-        border-bottom: 1px solid rgba(255,255,255,0.04);
-        color: rgba(255,255,255,0.75);
-        vertical-align: middle;
-    }
-    .td-table tbody tr:last-child td { border-bottom: none; }
-    .td-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
+    .td-table { width:100%; border-collapse:collapse; font-size:0.81rem; }
+    .td-table thead th { background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.3); font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; padding:0.6rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .td-table tbody td { padding:0.7rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.75); vertical-align:middle; }
+    .td-table tbody tr:last-child td { border-bottom:none; }
+    .td-table tbody tr:hover td { background:rgba(255,255,255,0.03); }
 
-    /* ── RISK BADGES ─────────────────────────── */
     .rb { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:50px; }
     .rb::before { content:''; width:4px; height:4px; border-radius:50%; background:currentColor; }
-    .rb-bajo    { background:rgba(0,255,150,0.1);  color:#00ff96; }
+    .rb-bajo    { background:rgba(0,255,150,0.1);   color:#00ff96; }
     .rb-medio   { background:rgba(251,191,36,0.12); color:#fbbf24; }
     .rb-alto    { background:rgba(251,146,60,0.12); color:#fb923c; }
     .rb-critico { background:rgba(239,68,68,0.12);  color:#ef4444; animation:rblink 1.5s infinite; }
     @keyframes rblink { 0%,100%{opacity:1} 50%{opacity:.5} }
-
-    /* ── ETL STATUS ──────────────────────────── */
     .es { font-size:0.68rem; font-weight:700; padding:2px 9px; border-radius:50px; display:inline-block; }
-    .es-ok   { background:rgba(0,255,150,0.1);  color:#00ff96; }
-    .es-err  { background:rgba(239,68,68,0.12); color:#ef4444; }
-    .es-proc { background:rgba(59,130,246,0.12);color:#60a5fa; }
+    .es-ok   { background:rgba(0,255,150,0.1);   color:#00ff96; }
+    .es-err  { background:rgba(239,68,68,0.12);  color:#ef4444; }
+    .es-proc { background:rgba(59,130,246,0.12); color:#60a5fa; }
 
-    /* ── SKELETON ────────────────────────────── */
     .skel { background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation:sk 1.4s infinite; border-radius:8px; }
     @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* MODAL */
+    .modal-dark .modal-content { background:#111827; border:1px solid rgba(255,255,255,0.1); border-radius:20px; color:#fff; box-shadow:0 40px 100px rgba(0,0,0,0.7); }
+    .modal-dark .modal-header { border-bottom:1px solid rgba(255,255,255,0.08); padding:1.25rem 1.5rem; }
+    .modal-dark .modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px; }
+    .modal-dark .modal-title .modal-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+    .modal-dark .btn-close { filter:invert(1) opacity(0.5); }
+    .modal-dark .modal-body { padding:0; }
+    .modal-dark .modal-footer { border-top:1px solid rgba(255,255,255,0.08); padding:0.85rem 1.5rem; }
+
+    .modal-stats { display:flex; gap:1.5rem; padding:1rem 1.5rem; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06); flex-wrap:wrap; }
+    .modal-stat .ms-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.4rem; font-weight:800; line-height:1; }
+    .modal-stat .ms-lbl { font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:0.7px; color:rgba(255,255,255,0.3); margin-top:2px; }
+
+    .modal-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+    .modal-table thead th { background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.3); font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; padding:0.6rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; }
+    .modal-table tbody td { padding:0.75rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.8); vertical-align:middle; }
+    .modal-table tbody tr:last-child td { border-bottom:none; }
+    .modal-table tbody tr:hover td { background:rgba(255,255,255,0.04); }
+
+    .rank-badge { width:24px; height:24px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-family:'Plus Jakarta Sans',sans-serif; font-size:0.72rem; font-weight:800; margin-right:4px; }
+    .rank-1 { background:rgba(255,215,0,0.15);   color:#ffd700; }
+    .rank-2 { background:rgba(192,192,192,0.15); color:#c0c0c0; }
+    .rank-3 { background:rgba(205,127,50,0.15);  color:#cd7f32; }
+    .rank-n { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4); }
+
+    .mini-bar { height:4px; border-radius:2px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:4px; width:80px; }
+    .mini-bar-fill { height:100%; border-radius:2px; transition:width .6s ease; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
 <div class="d-hero">
     <div class="d-hero-grid"></div>
     <div class="d-hero-glow"></div>
@@ -329,9 +122,9 @@
         <div>
             <div class="hero-eyebrow">Pipeline ETL ejecutado</div>
             <h1>Decisiones clínicas,<br><span class="grad">apoyadas por datos</span></h1>
-            <p id="heroDesc">Plataforma de analítica médica inteligente con detección automática de riesgo, modelos predictivos y alertas clínicas en tiempo real.</p>
+            <p>Plataforma de analítica médica inteligente con detección automática de riesgo, modelos predictivos y alertas clínicas en tiempo real.</p>
             <div class="hero-tags">
-                <div class="hero-tag"><i class="bi bi-database-fill"></i> <span id="heroReg">1800</span> pacientes limpios</div>
+                <div class="hero-tag"><i class="bi bi-database-fill"></i> <span id="heroReg">—</span> pacientes limpios</div>
                 <div class="hero-tag"><i class="bi bi-graph-up-arrow"></i> Diagnósticos normalizados</div>
                 <div class="hero-tag"><i class="bi bi-shield-fill-check"></i> Detección de anomalías</div>
                 <div class="hero-tag"><i class="bi bi-cpu-fill"></i> Score predictivo ML</div>
@@ -345,11 +138,9 @@
     </div>
 </div>
 
-<!-- BODY -->
 <div class="dash-body">
 
-    <!-- KPIs -->
-    <div class="sec-label">Indicadores Clave</div>
+    <div class="sec-label">Indicadores Clave — <span style="color:rgba(0,180,216,0.7)">Haz clic en cualquier tarjeta para ver el top 10</span></div>
     <div class="kpi-grid" id="kpiGrid">
         {% for i in "123456" %}
         <div class="kpi-dark">
@@ -360,7 +151,6 @@
         {% endfor %}
     </div>
 
-    <!-- CHARTS ROW 1 -->
     <div class="sec-label">Distribución Clínica</div>
     <div class="row g-3 mb-3">
         <div class="col-lg-4">
@@ -389,7 +179,6 @@
         </div>
     </div>
 
-    <!-- CHARTS ROW 2 -->
     <div class="row g-3 mb-4">
         <div class="col-lg-6">
             <div class="chart-dark">
@@ -415,7 +204,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM -->
     <div class="sec-label">Alertas y Actividad Reciente</div>
     <div class="row g-3">
         <div class="col-lg-6">
@@ -451,13 +239,41 @@
             </div>
         </div>
     </div>
-
 </div>
+
+<!-- MODAL -->
+<div class="modal fade modal-dark" id="modalTopPacientes" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <div class="modal-icon" id="modalIcon"></div>
+                    <span id="modalTitleText">Top Pacientes</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-stats" id="modalStats"></div>
+            <div class="modal-body">
+                <div id="modalLoading" class="text-center py-5">
+                    <div class="spinner-border" style="color:#00b4d8;width:2.5rem;height:2.5rem"></div>
+                    <p class="mt-3" style="color:rgba(255,255,255,0.4);font-size:.84rem">Cargando pacientes...</p>
+                </div>
+                <div id="modalTableWrap" style="display:none;overflow-x:auto"></div>
+            </div>
+            <div class="modal-footer" style="justify-content:space-between">
+                <span id="modalFooterNote" style="font-size:.76rem;color:rgba(255,255,255,0.3)"></span>
+                <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1)" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Hero init
+Chart.defaults.color = 'rgba(255,255,255,0.5)';
+
 const _u = (() => { try { return JSON.parse(localStorage.getItem('user')||'{}'); } catch { return {}; } })();
 document.getElementById('heroUser').textContent = `${_u.nombres||''} ${_u.apellidos||''}`.trim() || '—';
 document.getElementById('heroRole').textContent = _u.role || '—';
@@ -466,11 +282,14 @@ document.getElementById('heroDate').textContent = new Date().toLocaleDateString(
 const RC = { 'Bajo':'#00ff96','Medio':'#fbbf24','Alto':'#fb923c','Crítico':'#ef4444' };
 let cR, cE, cS, cI;
 
-const chartDefaults = {
-    color: 'rgba(255,255,255,0.6)',
-    borderColor: 'rgba(255,255,255,0.06)',
-};
-Chart.defaults.color = 'rgba(255,255,255,0.5)';
+const KPI_CONFIG = [
+    { cat:'todos',       label:'Total Pacientes',    icon:'people-fill',      color:'#60a5fa', glow:'#3b82f6', bg:'rgba(59,130,246,0.15)' },
+    { cat:'criticos',    label:'Pacientes Críticos', icon:'heart-pulse-fill', color:'#ef4444', glow:'#ef4444', bg:'rgba(239,68,68,0.15)' },
+    { cat:'hipertensos', label:'Hipertensos',        icon:'droplet-fill',     color:'#fb923c', glow:'#f97316', bg:'rgba(249,115,22,0.15)' },
+    { cat:'diabeticos',  label:'Diabéticos',         icon:'capsule',          color:'#c084fc', glow:'#9333ea', bg:'rgba(147,51,234,0.15)' },
+    { cat:'fumadores',   label:'Fumadores',           icon:'wind',             color:'#22d3ee', glow:'#06b6d4', bg:'rgba(6,182,212,0.15)' },
+    { cat:'alto_riesgo', label:'Alto Riesgo',         icon:'person-fill',      color:'#00ff96', glow:'#00ff96', bg:'rgba(0,255,150,0.1)' },
+];
 
 async function loadDashboard() {
     try {
@@ -494,110 +313,96 @@ async function loadDashboard() {
 }
 
 function renderKPIs(d) {
-    const kpis = [
-        { label:'Total Pacientes',    value:d.total_pacientes||0,      icon:'people-fill',      color:'#60a5fa', glow:'#3b82f6', bg:'rgba(59,130,246,0.15)',  sub:'', pct:'' },
-        { label:'Pacientes Críticos', value:d.pacientes_criticos||0,   icon:'heart-pulse-fill', color:'#ef4444', glow:'#ef4444', bg:'rgba(239,68,68,0.15)',   sub:d.porcentaje_criticos, pct:'% del total' },
-        { label:'Hipertensos',        value:d.pacientes_hipertensos||0,icon:'droplet-fill',      color:'#fb923c', glow:'#f97316', bg:'rgba(249,115,22,0.15)',  sub:d.porcentaje_hipertensos, pct:'% del total' },
-        { label:'Diabéticos',         value:d.pacientes_diabeticos||0, icon:'capsule',           color:'#c084fc', glow:'#9333ea', bg:'rgba(147,51,234,0.15)', sub:d.porcentaje_diabeticos, pct:'% del total' },
-        { label:'Fumadores',          value:d.pacientes_fumadores||0,  icon:'wind',              color:'#22d3ee', glow:'#06b6d4', bg:'rgba(6,182,212,0.15)',  sub:'', pct:'' },
-        { label:'Promedio IMC',       value:d.promedio_imc||0,         icon:'person-fill',       color:'#00ff96', glow:'#00ff96', bg:'rgba(0,255,150,0.1)',   sub:'', pct:'' },
-    ];
-    document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
-        <div class="kpi-dark">
+    const values = [d.total_pacientes||0, d.pacientes_criticos||0, d.pacientes_hipertensos||0, d.pacientes_diabeticos||0, d.pacientes_fumadores||0, d.promedio_imc||0];
+    const pcts   = ['', d.porcentaje_criticos, d.porcentaje_hipertensos, d.porcentaje_diabeticos, '', ''];
+    document.getElementById('kpiGrid').innerHTML = KPI_CONFIG.map((k,i) => `
+        <div class="kpi-dark" onclick="openModal('${k.cat}','${k.label}','${k.icon}','${k.color}','${k.bg}')">
             <div class="kpi-glow" style="background:${k.glow}"></div>
             <div class="kpi-top">
-                <div class="kpi-icon" style="background:${k.bg}">
-                    <i class="bi bi-${k.icon}" style="color:${k.color}"></i>
-                </div>
-                ${k.sub ? `<span class="kpi-trend" style="background:${k.bg};color:${k.color}">↑ ${k.sub}${k.pct}</span>` : ''}
+                <div class="kpi-icon" style="background:${k.bg}"><i class="bi bi-${k.icon}" style="color:${k.color}"></i></div>
+                ${pcts[i]?`<span class="kpi-trend" style="background:${k.bg};color:${k.color}">↑ ${pcts[i]}%</span>`:''}
             </div>
-            <div class="kpi-num" style="color:${k.color}">${typeof k.value==='number'?k.value.toLocaleString('es-CO'):k.value}</div>
+            <div class="kpi-num" style="color:${k.color}">${typeof values[i]==='number'?values[i].toLocaleString('es-CO'):values[i]}</div>
             <div class="kpi-lbl">${k.label}</div>
+            <div class="kpi-click-hint"><i class="bi bi-cursor-fill"></i> Ver top 10</div>
         </div>`).join('');
+}
+
+async function openModal(categoria, label, icon, color, bg) {
+    document.getElementById('modalLoading').style.display = 'block';
+    document.getElementById('modalTableWrap').style.display = 'none';
+    document.getElementById('modalStats').innerHTML = '';
+    document.getElementById('modalIcon').innerHTML = `<i class="bi bi-${icon}" style="color:${color}"></i>`;
+    document.getElementById('modalIcon').style.cssText = `width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:1rem`;
+    document.getElementById('modalTitleText').textContent = `Top 10 — ${label}`;
+    const modal = new bootstrap.Modal(document.getElementById('modalTopPacientes'));
+    modal.show();
+    try {
+        const data = await apiCall(`/analytics/top-pacientes/?categoria=${categoria}&limit=10`);
+        const prom_ps   = data.pacientes.length?(data.pacientes.reduce((a,p)=>a+(p.presion_sistolica||0),0)/data.pacientes.length).toFixed(1):'—';
+        const prom_gl   = data.pacientes.length?(data.pacientes.reduce((a,p)=>a+(p.glucosa||0),0)/data.pacientes.length).toFixed(1):'—';
+        const prom_edad = data.pacientes.length?(data.pacientes.reduce((a,p)=>a+(p.edad||0),0)/data.pacientes.length).toFixed(1):'—';
+        document.getElementById('modalStats').innerHTML = `
+            <div class="modal-stat"><div class="ms-num" style="color:${color}">${data.total.toLocaleString('es-CO')}</div><div class="ms-lbl">Total categoría</div></div>
+            <div class="modal-stat"><div class="ms-num" style="color:#60a5fa">${prom_edad}</div><div class="ms-lbl">Edad promedio</div></div>
+            <div class="modal-stat"><div class="ms-num" style="color:#fb923c">${prom_ps}</div><div class="ms-lbl">Presión S. prom.</div></div>
+            <div class="modal-stat"><div class="ms-num" style="color:#c084fc">${prom_gl}</div><div class="ms-lbl">Glucosa prom.</div></div>`;
+        document.getElementById('modalFooterNote').textContent = `Mostrando top 10 de ${data.total.toLocaleString('es-CO')} pacientes en "${data.label}"`;
+        const maxPS = Math.max(...data.pacientes.map(p=>p.presion_sistolica||0));
+        const maxGL = Math.max(...data.pacientes.map(p=>p.glucosa||0));
+        const riskBadge = r => { const cls={'Bajo':'rb-bajo','Medio':'rb-medio','Alto':'rb-alto','Crítico':'rb-critico'}[r]||'rb-bajo'; return `<span class="rb ${cls}">${r}</span>`; };
+        const rankBadge = i => { const cls=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n'; return `<span class="rank-badge ${cls}">${i+1}</span>`; };
+        document.getElementById('modalTableWrap').innerHTML = `
+            <table class="modal-table">
+                <thead><tr><th>#</th><th>Paciente</th><th>Edad</th><th>Sexo</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th><th>IMC</th><th>Riesgo</th><th>Fumador</th></tr></thead>
+                <tbody>${data.pacientes.map((p,i)=>`<tr>
+                    <td>${rankBadge(i)}</td>
+                    <td><strong style="color:#fff">${p.nombres} ${p.apellidos}</strong><br><small style="color:rgba(255,255,255,0.35)">${p.diagnostico_preliminar}</small></td>
+                    <td style="color:rgba(255,255,255,0.5)">${p.edad} años</td>
+                    <td>${p.sexo==='M'?'<span style="color:#60a5fa">♂ Masc.</span>':'<span style="color:#ec4899">♀ Fem.</span>'}</td>
+                    <td><strong style="color:#fb923c">${p.presion_sistolica||'—'}</strong><div class="mini-bar"><div class="mini-bar-fill" style="width:${maxPS?(p.presion_sistolica/maxPS*100):0}%;background:#fb923c"></div></div></td>
+                    <td><strong style="color:#c084fc">${p.glucosa?p.glucosa.toFixed(1):'—'}</strong><div class="mini-bar"><div class="mini-bar-fill" style="width:${maxGL?(p.glucosa/maxGL*100):0}%;background:#c084fc"></div></div></td>
+                    <td><span style="color:${p.saturacion_oxigeno<85?'#ef4444':'#00ff96'}">${p.saturacion_oxigeno?p.saturacion_oxigeno.toFixed(1)+'%':'—'}</span></td>
+                    <td>${p.imc?p.imc.toFixed(1):'—'}</td>
+                    <td>${riskBadge(p.riesgo_enfermedad)}</td>
+                    <td>${p.fumador?'<span style="color:#fbbf24;font-size:.7rem">🚬 Sí</span>':'<span style="color:rgba(255,255,255,0.2);font-size:.7rem">No</span>'}</td>
+                </tr>`).join('')}</tbody>
+            </table>`;
+        document.getElementById('modalLoading').style.display = 'none';
+        document.getElementById('modalTableWrap').style.display = 'block';
+    } catch(e) {
+        document.getElementById('modalLoading').innerHTML = `<p class="text-danger text-center py-4"><i class="bi bi-exclamation-circle me-2"></i>Error cargando datos</p>`;
+    }
 }
 
 function renderRiesgo(dist) {
     if(cR) cR.destroy();
-    const labels = Object.keys(dist), values = Object.values(dist);
-    cR = new Chart(document.getElementById('chartRiesgo'), {
-        type:'doughnut',
-        data:{ labels, datasets:[{ data:values, backgroundColor:labels.map(l=>RC[l]||'#555'), borderWidth:3, borderColor:'#111827', hoverBorderWidth:0 }] },
-        options:{ cutout:'72%', plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, padding:14, usePointStyle:true, pointStyleWidth:8 } } } }
-    });
+    const labels=Object.keys(dist), values=Object.values(dist);
+    cR = new Chart(document.getElementById('chartRiesgo'),{ type:'doughnut', data:{ labels, datasets:[{ data:values, backgroundColor:labels.map(l=>RC[l]||'#555'), borderWidth:3, borderColor:'#111827', hoverBorderWidth:0 }] }, options:{ cutout:'72%', plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, padding:14, usePointStyle:true, pointStyleWidth:8 } } } } });
 }
-
 function renderEdad(data) {
     if(cE) cE.destroy();
-    cE = new Chart(document.getElementById('chartEdad'), {
-        type:'bar',
-        data:{ labels:data.map(d=>d.grupo_edad), datasets:[
-            { label:'Bajo',    data:data.map(d=>d.bajo),    backgroundColor:'#00ff96', borderRadius:4 },
-            { label:'Medio',   data:data.map(d=>d.medio),   backgroundColor:'#fbbf24', borderRadius:4 },
-            { label:'Alto',    data:data.map(d=>d.alto),    backgroundColor:'#fb923c', borderRadius:4 },
-            { label:'Crítico', data:data.map(d=>d.critico), backgroundColor:'#ef4444', borderRadius:4 },
-        ]},
-        options:{
-            scales:{
-                x:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)',font:{size:11}} },
-                y:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)',font:{size:11}} }
-            },
-            plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } }
-        }
-    });
+    cE = new Chart(document.getElementById('chartEdad'),{ type:'bar', data:{ labels:data.map(d=>d.grupo_edad), datasets:[ { label:'Bajo', data:data.map(d=>d.bajo), backgroundColor:'#00ff96', borderRadius:4 }, { label:'Medio', data:data.map(d=>d.medio), backgroundColor:'#fbbf24', borderRadius:4 }, { label:'Alto', data:data.map(d=>d.alto), backgroundColor:'#fb923c', borderRadius:4 }, { label:'Crítico', data:data.map(d=>d.critico), backgroundColor:'#ef4444', borderRadius:4 } ] }, options:{ scales:{ x:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} }, y:{ stacked:true, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} } }, plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } } });
 }
-
 function renderSexo(data) {
     if(cS) cS.destroy();
-    cS = new Chart(document.getElementById('chartSexo'), {
-        type:'bar',
-        data:{ labels:data.map(d=>d.sexo==='M'?'Masculino':'Femenino'), datasets:[
-            { label:'Total',    data:data.map(d=>d.total),   backgroundColor:['#3b82f6','#ec4899'], borderRadius:6 },
-            { label:'Críticos', data:data.map(d=>d.criticos),backgroundColor:['#1d4ed8','#be185d'], borderRadius:6 },
-        ]},
-        options:{
-            scales:{
-                x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} },
-                y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.4)'} }
-            },
-            plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } }
-        }
-    });
+    cS = new Chart(document.getElementById('chartSexo'),{ type:'bar', data:{ labels:data.map(d=>d.sexo==='M'?'Masculino':'Femenino'), datasets:[ { label:'Total', data:data.map(d=>d.total), backgroundColor:['#3b82f6','#ec4899'], borderRadius:6 }, { label:'Críticos', data:data.map(d=>d.criticos), backgroundColor:['#1d4ed8','#be185d'], borderRadius:6 } ] }, options:{ scales:{ x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)'}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)'}} }, plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } } });
 }
-
 function renderImc(data) {
     if(cI) cI.destroy();
-    const colors = { 'Bajo peso':'#22d3ee','Normal':'#00ff96','Sobrepeso':'#fbbf24','Obesidad':'#ef4444' };
-    cI = new Chart(document.getElementById('chartImc'), {
-        type:'pie',
-        data:{ labels:data.map(d=>d.imc_clasificacion), datasets:[{ data:data.map(d=>d.total), backgroundColor:data.map(d=>colors[d.imc_clasificacion]||'#555'), borderWidth:3, borderColor:'#111827' }] },
-        options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } }
-    });
+    const colors={'Bajo peso':'#22d3ee','Normal':'#00ff96','Sobrepeso':'#fbbf24','Obesidad':'#ef4444'};
+    cI = new Chart(document.getElementById('chartImc'),{ type:'pie', data:{ labels:data.map(d=>d.imc_clasificacion), datasets:[{ data:data.map(d=>d.total), backgroundColor:data.map(d=>colors[d.imc_clasificacion]||'#555'), borderWidth:3, borderColor:'#111827' }] }, options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', font:{size:11,weight:'600'}, usePointStyle:true, pointStyleWidth:8, padding:14 } } } } });
 }
-
 function renderCriticos(data) {
-    const c = document.getElementById('tablaCriticos');
+    const c=document.getElementById('tablaCriticos');
     if(!data?.pacientes?.length){ c.innerHTML='<p class="text-center py-4" style="color:rgba(255,255,255,0.3);font-size:.84rem"><i class="bi bi-check-circle-fill me-2" style="color:#00ff96"></i>Sin pacientes críticos</p>'; return; }
-    c.innerHTML = `<table class="td-table"><thead><tr><th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th></tr></thead><tbody>`
-        + data.pacientes.slice(0,8).map(p=>`<tr>
-            <td><strong style="color:#fff">${p.nombres} ${p.apellidos}</strong><br><small style="color:rgba(255,255,255,0.35)">${p.edad} años · ${p.diagnostico_preliminar}</small></td>
-            <td><span class="rb ${p.presion_sistolica>180?'rb-critico':'rb-medio'}">${p.presion_sistolica} mmHg</span></td>
-            <td><span class="rb ${p.glucosa>300?'rb-critico':'rb-bajo'}">${(p.glucosa||0).toFixed(1)}</span></td>
-            <td><span class="rb ${p.saturacion_oxigeno<85?'rb-critico':'rb-bajo'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td>
-        </tr>`).join('') + '</tbody></table>';
+    c.innerHTML=`<table class="td-table"><thead><tr><th>Paciente</th><th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th></tr></thead><tbody>`+data.pacientes.slice(0,8).map(p=>`<tr><td><strong style="color:#fff">${p.nombres} ${p.apellidos}</strong><br><small style="color:rgba(255,255,255,0.35)">${p.edad} años · ${p.diagnostico_preliminar}</small></td><td><span class="rb ${p.presion_sistolica>180?'rb-critico':'rb-medio'}">${p.presion_sistolica} mmHg</span></td><td><span class="rb ${p.glucosa>300?'rb-critico':'rb-bajo'}">${(p.glucosa||0).toFixed(1)}</span></td><td><span class="rb ${p.saturacion_oxigeno<85?'rb-critico':'rb-bajo'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td></tr>`).join('')+'</tbody></table>';
 }
-
 function renderEtl(data) {
-    const c = document.getElementById('tablaEtl');
+    const c=document.getElementById('tablaEtl');
     if(!data?.length){ c.innerHTML='<p class="text-center py-4" style="color:rgba(255,255,255,0.3);font-size:.84rem"><i class="bi bi-arrow-repeat me-2"></i>Sin procesos ETL ejecutados</p>'; return; }
-    const sc = {'COMPLETADO':'es-ok','ERROR':'es-err','EN_PROCESO':'es-proc','PENDIENTE':'es-proc'};
-    c.innerHTML = `<table class="td-table"><thead><tr><th>Fecha</th><th>Fuente</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead><tbody>`
-        + data.slice(0,6).map(e=>`<tr>
-            <td style="white-space:nowrap"><small>${new Date(e.fecha_inicio).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}</small></td>
-            <td><small style="color:rgba(255,255,255,0.4)">${e.fuente}</small></td>
-            <td><strong style="color:#60a5fa">${e.registros_cargados}</strong></td>
-            <td><small>${e.tiempo_ejecucion?e.tiempo_ejecucion.toFixed(1)+'s':'—'}</small></td>
-            <td><span class="es ${sc[e.estado]||'es-proc'}">${e.estado}</span></td>
-        </tr>`).join('') + '</tbody></table>';
+    const sc={'COMPLETADO':'es-ok','ERROR':'es-err','EN_PROCESO':'es-proc','PENDIENTE':'es-proc'};
+    c.innerHTML=`<table class="td-table"><thead><tr><th>Fecha</th><th>Fuente</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead><tbody>`+data.slice(0,6).map(e=>`<tr><td style="white-space:nowrap"><small>${new Date(e.fecha_inicio).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}</small></td><td><small style="color:rgba(255,255,255,0.4)">${e.fuente}</small></td><td><strong style="color:#60a5fa">${e.registros_cargados}</strong></td><td><small>${e.tiempo_ejecucion?e.tiempo_ejecucion.toFixed(1)+'s':'—'}</small></td><td><span class="es ${sc[e.estado]||'es-proc'}">${e.estado}</span></td></tr>`).join('')+'</tbody></table>';
 }
 
 loadDashboard();

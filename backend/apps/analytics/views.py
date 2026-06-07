@@ -18,10 +18,8 @@ def _get_pacientes_qs():
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def kpis_view(request):
-    """KPIs médicos principales del dashboard"""
     qs = _get_pacientes_qs()
     total = qs.count()
-
     if total == 0:
         return Response({'total': 0, 'message': 'Sin datos. Ejecute el proceso ETL primero.'})
 
@@ -29,9 +27,7 @@ def kpis_view(request):
     hipertensos = qs.filter(es_hipertenso=True).count()
     diabeticos = qs.filter(es_diabetico=True).count()
     fumadores = qs.filter(fumador=True).count()
-
     riesgo_counts = dict(qs.values_list('riesgo_enfermedad').annotate(c=Count('id')).values_list('riesgo_enfermedad', 'c'))
-
     edad_avg = qs.aggregate(v=Avg('edad'))['v'] or 0
     imc_avg = qs.aggregate(v=Avg('imc'))['v'] or 0
     glucosa_avg = qs.aggregate(v=Avg('glucosa'))['v'] or 0
@@ -57,13 +53,9 @@ def kpis_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def estadistica_descriptiva_view(request):
-    """Estadísticas descriptivas de variables clínicas numéricas"""
     qs = _get_pacientes_qs()
     if not qs.exists():
         return Response({'message': 'Sin datos'})
-
-    import pandas as pd
-    from django.db import connection
 
     fields = ['edad', 'peso', 'altura', 'imc', 'presion_sistolica',
               'presion_diastolica', 'frecuencia_cardiaca', 'glucosa',
@@ -71,8 +63,7 @@ def estadistica_descriptiva_view(request):
 
     result = {}
     for field in fields:
-        vals = list(qs.values_list(field, flat=True))
-        vals = [v for v in vals if v is not None]
+        vals = [v for v in qs.values_list(field, flat=True) if v is not None]
         if vals:
             arr = np.array(vals)
             from scipy import stats as sp_stats
@@ -86,85 +77,59 @@ def estadistica_descriptiva_view(request):
                 'maximo': round(float(np.max(arr)), 2),
                 'n': len(vals),
             }
-
     return Response(result)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def segmentacion_riesgo_view(request):
-    """Segmentación de pacientes por riesgo"""
     qs = _get_pacientes_qs()
-    data = (
-        qs.values('riesgo_enfermedad')
-        .annotate(
-            total=Count('id'),
-            edad_promedio=Avg('edad'),
-            imc_promedio=Avg('imc'),
-            glucosa_promedio=Avg('glucosa'),
-        )
-        .order_by('riesgo_enfermedad')
-    )
+    data = (qs.values('riesgo_enfermedad')
+              .annotate(total=Count('id'), edad_promedio=Avg('edad'),
+                        imc_promedio=Avg('imc'), glucosa_promedio=Avg('glucosa'))
+              .order_by('riesgo_enfermedad'))
     return Response(list(data))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def segmentacion_sexo_view(request):
-    """Segmentación por sexo"""
     qs = _get_pacientes_qs()
-    data = (
-        qs.values('sexo')
-        .annotate(
-            total=Count('id'),
-            criticos=Count('id', filter=Q(es_critico=True)),
-            hipertensos=Count('id', filter=Q(es_hipertenso=True)),
-            diabeticos=Count('id', filter=Q(es_diabetico=True)),
-            imc_promedio=Avg('imc'),
-        )
-    )
+    data = (qs.values('sexo')
+              .annotate(total=Count('id'),
+                        criticos=Count('id', filter=Q(es_critico=True)),
+                        hipertensos=Count('id', filter=Q(es_hipertenso=True)),
+                        diabeticos=Count('id', filter=Q(es_diabetico=True)),
+                        imc_promedio=Avg('imc')))
     return Response(list(data))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def segmentacion_diagnostico_view(request):
-    """Distribución por diagnóstico"""
     qs = _get_pacientes_qs()
-    data = (
-        qs.values('diagnostico_preliminar')
-        .annotate(
-            total=Count('id'),
-            edad_promedio=Avg('edad'),
-            riesgo_alto=Count('id', filter=Q(riesgo_enfermedad__in=['Alto', 'Crítico'])),
-        )
-        .order_by('-total')
-    )
+    data = (qs.values('diagnostico_preliminar')
+              .annotate(total=Count('id'), edad_promedio=Avg('edad'),
+                        riesgo_alto=Count('id', filter=Q(riesgo_enfermedad__in=['Alto', 'Crítico'])))
+              .order_by('-total'))
     return Response(list(data))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def segmentacion_imc_view(request):
-    """Distribución por clasificación IMC"""
     qs = _get_pacientes_qs()
-    data = (
-        qs.values('imc_clasificacion')
-        .annotate(
-            total=Count('id'),
-            glucosa_promedio=Avg('glucosa'),
-            presion_promedio=Avg('presion_sistolica'),
-            criticos=Count('id', filter=Q(es_critico=True)),
-        )
-        .order_by('-total')
-    )
+    data = (qs.values('imc_clasificacion')
+              .annotate(total=Count('id'), glucosa_promedio=Avg('glucosa'),
+                        presion_promedio=Avg('presion_sistolica'),
+                        criticos=Count('id', filter=Q(es_critico=True)))
+              .order_by('-total'))
     return Response(list(data))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def pacientes_criticos_view(request):
-    """Lista de pacientes críticos"""
     criticos = _get_pacientes_qs().filter(es_critico=True).order_by('-presion_sistolica')[:100]
     data = list(criticos.values(
         'id_paciente', 'nombres', 'apellidos', 'edad', 'sexo',
@@ -177,7 +142,6 @@ def pacientes_criticos_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def tendencia_edad_riesgo_view(request):
-    """Tendencia de riesgo por grupo de edad"""
     qs = _get_pacientes_qs()
     grupos = [
         ('0-17', 0, 17), ('18-35', 18, 35), ('36-50', 36, 50),
@@ -185,18 +149,17 @@ def tendencia_edad_riesgo_view(request):
     ]
     result = []
     for label, lo, hi in grupos:
-        grupo_qs = qs.filter(edad__gte=lo, edad__lte=hi)
-        total = grupo_qs.count()
+        g = qs.filter(edad__gte=lo, edad__lte=hi)
+        total = g.count()
         if total == 0:
             continue
         result.append({
-            'grupo_edad': label,
-            'total': total,
-            'bajo': grupo_qs.filter(riesgo_enfermedad='Bajo').count(),
-            'medio': grupo_qs.filter(riesgo_enfermedad='Medio').count(),
-            'alto': grupo_qs.filter(riesgo_enfermedad='Alto').count(),
-            'critico': grupo_qs.filter(riesgo_enfermedad='Crítico').count(),
-            'imc_promedio': round(grupo_qs.aggregate(v=Avg('imc'))['v'] or 0, 2),
+            'grupo_edad': label, 'total': total,
+            'bajo':    g.filter(riesgo_enfermedad='Bajo').count(),
+            'medio':   g.filter(riesgo_enfermedad='Medio').count(),
+            'alto':    g.filter(riesgo_enfermedad='Alto').count(),
+            'critico': g.filter(riesgo_enfermedad='Crítico').count(),
+            'imc_promedio': round(g.aggregate(v=Avg('imc'))['v'] or 0, 2),
         })
     return Response(result)
 
@@ -204,7 +167,6 @@ def tendencia_edad_riesgo_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def heatmap_correlacion_view(request):
-    """Datos de correlación clínica para heatmap"""
     qs = _get_pacientes_qs()
     if not qs.exists():
         return Response({'message': 'Sin datos'})
@@ -221,14 +183,42 @@ def heatmap_correlacion_view(request):
 
     df = pd.DataFrame(vals).dropna()
     corr = df.corr().round(3)
-
     matrix = []
     for i, row_label in enumerate(labels):
         for j, col_label in enumerate(labels):
-            matrix.append({
-                'x': col_label,
-                'y': row_label,
-                'v': float(corr.iloc[i, j])
-            })
-
+            matrix.append({'x': col_label, 'y': row_label, 'v': float(corr.iloc[i, j])})
     return Response({'labels': labels, 'matrix': matrix})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def top_pacientes_categoria_view(request):
+    """Top 10 pacientes por categoría para modal del dashboard"""
+    categoria = request.GET.get('categoria', 'criticos')
+    limit = int(request.GET.get('limit', 10))
+    qs = _get_pacientes_qs()
+
+    campos = ['id_paciente', 'nombres', 'apellidos', 'edad', 'sexo',
+              'presion_sistolica', 'glucosa', 'saturacion_oxigeno',
+              'imc', 'colesterol', 'frecuencia_cardiaca',
+              'riesgo_enfermedad', 'diagnostico_preliminar', 'fumador']
+
+    config = {
+        'criticos':    {'filter': Q(es_critico=True),    'order': '-presion_sistolica', 'label': 'Pacientes Críticos',    'color': '#ef4444'},
+        'hipertensos': {'filter': Q(es_hipertenso=True), 'order': '-presion_sistolica', 'label': 'Pacientes Hipertensos', 'color': '#fb923c'},
+        'diabeticos':  {'filter': Q(es_diabetico=True),  'order': '-glucosa',           'label': 'Pacientes Diabéticos',  'color': '#c084fc'},
+        'fumadores':   {'filter': Q(fumador=True),        'order': '-edad',              'label': 'Pacientes Fumadores',   'color': '#22d3ee'},
+        'alto_riesgo': {'filter': Q(riesgo_enfermedad__in=['Alto', 'Crítico']), 'order': '-presion_sistolica', 'label': 'Alto Riesgo', 'color': '#fbbf24'},
+        'todos':       {'filter': Q(),                    'order': '-presion_sistolica', 'label': 'Todos los Pacientes',   'color': '#60a5fa'},
+    }
+
+    cfg = config.get(categoria, config['criticos'])
+    pacientes = list(qs.filter(cfg['filter']).order_by(cfg['order'])[:limit].values(*campos))
+
+    return Response({
+        'categoria': categoria,
+        'label': cfg['label'],
+        'color': cfg['color'],
+        'total': qs.filter(cfg['filter']).count(),
+        'pacientes': pacientes,
+    })
