@@ -31,3 +31,12 @@ db.sqlite3
 # Archivos temporales
 *.tmp
 *.temp
+notepad .gitignore
+
+# Archivos grandes
+datasets/*.xlsx
+datasets/*.csv
+ml_models/
+*.pkl
+*.joblib
+staticfiles/
