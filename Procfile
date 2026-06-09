@@ -1,0 +1,3 @@
+web: cd backend && python manage.py migrate --settings=config.settings_production && python 
+manage.py collectstatic --noinput --settings=config.settings_production && gunicorn 
+config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
