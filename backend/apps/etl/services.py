@@ -408,10 +408,22 @@ class ETLService:
         errors = 0
 
         df = df.drop_duplicates(subset=['id_paciente'], keep='last')
-        self._log(f'LOAD: {len(df)} registros únicos tras limpieza de duplicados en el archivo')
+        total = len(df)
+        self._log(f'LOAD: {total} registros únicos tras limpieza de duplicados en el archivo')
+
+        if total == 0:
+            self._log('LOAD: Sin registros para cargar')
+            self.stats['cargados'] = 0
+            return 0
+
+        ids = [int(i) for i in df['id_paciente'].tolist() if pd.notna(i) and int(i) > 0]
+        if ids:
+            existing = Paciente.objects.filter(id_paciente__in=ids)
+            self._log(f'LOAD: Eliminando {existing.count()} registros existentes para evitar duplicados')
+            existing.delete()
 
         BATCH_SIZE = 100
-        total = len(df)
+        processed_ids = set()
 
         for batch_start in range(0, total, BATCH_SIZE):
             batch = df.iloc[batch_start:batch_start + BATCH_SIZE]
@@ -420,36 +432,43 @@ class ETLService:
                     for _, row in batch.iterrows():
                         try:
                             p_obj = self._row_to_paciente(row)
-                            defaults = {
-                                'nombres': p_obj.nombres,
-                                'apellidos': p_obj.apellidos,
-                                'edad': p_obj.edad,
-                                'sexo': p_obj.sexo,
-                                'peso': p_obj.peso,
-                                'altura': p_obj.altura,
-                                'imc': p_obj.imc,
-                                'imc_clasificacion': p_obj.imc_clasificacion,
-                                'presion_sistolica': p_obj.presion_sistolica,
-                                'presion_diastolica': p_obj.presion_diastolica,
-                                'frecuencia_cardiaca': p_obj.frecuencia_cardiaca,
-                                'glucosa': p_obj.glucosa,
-                                'colesterol': p_obj.colesterol,
-                                'saturacion_oxigeno': p_obj.saturacion_oxigeno,
-                                'temperatura': p_obj.temperatura,
-                                'antecedentes_familiares': p_obj.antecedentes_familiares,
-                                'fumador': p_obj.fumador,
-                                'consumo_alcohol': p_obj.consumo_alcohol,
-                                'actividad_fisica': p_obj.actividad_fisica,
-                                'diagnostico_preliminar': p_obj.diagnostico_preliminar,
-                                'riesgo_enfermedad': p_obj.riesgo_enfermedad,
-                                'fecha_consulta': p_obj.fecha_consulta,
-                                'es_critico': p_obj.es_critico,
-                                'es_hipertenso': p_obj.es_hipertenso,
-                                'es_diabetico': p_obj.es_diabetico,
-                            }
+                            pid = p_obj.id_paciente
+                            if pid in processed_ids or pid <= 0:
+                                if pid <= 0:
+                                    self._log(f'LOAD: id_paciente inválido ({pid}), saltando', 'WARNING')
+                                else:
+                                    self._log(f'LOAD: id_paciente {pid} repetido en el archivo, saltando', 'WARNING')
+                                continue
+                            processed_ids.add(pid)
                             Paciente.objects.update_or_create(
-                                id_paciente=p_obj.id_paciente,
-                                defaults=defaults
+                                id_paciente=pid,
+                                defaults={
+                                    'nombres': p_obj.nombres,
+                                    'apellidos': p_obj.apellidos,
+                                    'edad': p_obj.edad,
+                                    'sexo': p_obj.sexo,
+                                    'peso': p_obj.peso,
+                                    'altura': p_obj.altura,
+                                    'imc': p_obj.imc,
+                                    'imc_clasificacion': p_obj.imc_clasificacion,
+                                    'presion_sistolica': p_obj.presion_sistolica,
+                                    'presion_diastolica': p_obj.presion_diastolica,
+                                    'frecuencia_cardiaca': p_obj.frecuencia_cardiaca,
+                                    'glucosa': p_obj.glucosa,
+                                    'colesterol': p_obj.colesterol,
+                                    'saturacion_oxigeno': p_obj.saturacion_oxigeno,
+                                    'temperatura': p_obj.temperatura,
+                                    'antecedentes_familiares': p_obj.antecedentes_familiares,
+                                    'fumador': p_obj.fumador,
+                                    'consumo_alcohol': p_obj.consumo_alcohol,
+                                    'actividad_fisica': p_obj.actividad_fisica,
+                                    'diagnostico_preliminar': p_obj.diagnostico_preliminar,
+                                    'riesgo_enfermedad': p_obj.riesgo_enfermedad,
+                                    'fecha_consulta': p_obj.fecha_consulta,
+                                    'es_critico': p_obj.es_critico,
+                                    'es_hipertenso': p_obj.es_hipertenso,
+                                    'es_diabetico': p_obj.es_diabetico,
+                                }
                             )
                             loaded += 1
                         except Exception as e:

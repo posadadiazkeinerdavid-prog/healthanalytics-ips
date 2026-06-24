@@ -179,7 +179,7 @@ function renderTabla(pacientes) {
             <td><strong style="color:#fb923c">${p_s}</strong></td>
             <td><strong style="color:#c084fc">${glu}</strong></td>
             <td><span style="color:${p.saturacion_oxigeno < 85 ? '#ef4444' : '#00ff96'}">${sat}</span></td>
-            <td><small class="text-muted">${p.diagnostico_preliminar}</small></td>
+            <td><span class="badge" style="background:rgba(0,180,216,0.12);color:#00b4d8;font-weight:500;font-size:0.7rem">${p.diagnostico_preliminar}</span></td>
             <td>${riskBadge(p.riesgo_enfermedad)}</td>
             <td>
                 ${p.es_critico ? '<i class="bi bi-exclamation-triangle-fill text-danger me-1" title="Crítico"></i>' : ''}
