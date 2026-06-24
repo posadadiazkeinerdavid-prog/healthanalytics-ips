@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+{% block title %}Analítica - HealthAnalytics IPS{% endblock %}
+{% block page_title %}Analítica de Datos Clínicos{% endblock %}
+{% block nav_analytics %}active{% endblock %}
+
+{% block content %}
+<!-- TABS -->
+<ul class="nav nav-tabs mb-3" id="analyticsTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabKpis"><i class="bi bi-speedometer2 me-1"></i>KPIs</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabEstadisticas"><i class="bi bi-calculator me-1"></i>Estadística Descriptiva</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSegmentacion"><i class="bi bi-diagram-3 me-1"></i>Segmentación</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabCriticos"><i class="bi bi-exclamation-triangle me-1"></i>Pacientes Críticos</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabHeatmap"><i class="bi bi-grid-3x3 me-1"></i>Heatmap Correlación</a></li>
+</ul>
+
+<div class="tab-content">
+    <!-- KPIs TAB -->
+    <div class="tab-pane fade show active" id="tabKpis">
+        <div class="row g-3 mb-3" id="kpiCards">
+            <div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribución Diagnósticos</h6>
+                    <canvas id="chartDiag" height="250"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>Riesgo por Grupo Edad</h6>
+                    <canvas id="chartEdadRiesgo" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICAS TAB -->
+    <div class="tab-pane fade" id="tabEstadisticas">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0 fw-semibold">Estadísticas Descriptivas de Variables Clínicas</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Variable</th><th>Media</th><th>Mediana</th><th>Moda</th>
+                            <th>Desv. Estándar</th><th>Mínimo</th><th>Máximo</th><th>N</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEstadisticas">
+                        <tr><td colspan="8" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEGMENTACIÓN TAB -->
+    <div class="tab-pane fade" id="tabSegmentacion">
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="fw-semibold mb-3">Por Sexo</h6>
+                    <canvas id="chartSexoSeg" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="fw-semibold mb-3">Por Clasificación IMC</h6>
+                    <canvas id="chartImcSeg" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="fw-semibold mb-3">Por Diagnóstico</h6>
+                    <canvas id="chartDiagSeg" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRÍTICOS TAB -->
+    <div class="tab-pane fade" id="tabCriticos">
+        <div class="card border-0 shadow-sm mb-3 p-3" style="background:linear-gradient(135deg,#fff5f5,#ffe0e0)">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                <div>
+                    <h5 class="fw-bold mb-1 text-danger">Alertas Clínicas Activas</h5>
+                    <p class="mb-0 small text-muted">Pacientes que cumplen criterios de estado crítico:
+                    Presión sistólica &gt;180 mmHg | Glucosa &gt;300 mg/dL | Saturación O₂ &lt;85%</p>
+                </div>
+                <div class="ms-auto text-center">
+                    <div class="fs-2 fw-bold text-danger" id="totalCriticos">—</div>
+                    <div class="small text-muted">Pacientes críticos</div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Paciente</th><th>Edad</th><th>Sexo</th>
+                            <th>Presión S.</th><th>Glucosa</th><th>Sat.O₂</th>
+                            <th>Diagnóstico</th><th>Riesgo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCriticos">
+                        <tr><td colspan="8" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEATMAP TAB -->
+    <div class="tab-pane fade" id="tabHeatmap">
+        <div class="card border-0 shadow-sm p-3 mb-3" style="background:linear-gradient(135deg,#f0f4ff,#e8f0fe)">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-grid-3x3-gap-fill text-primary fs-2"></i>
+                <div>
+                    <h5 class="fw-bold mb-1">Heatmap de Correlación Clínica</h5>
+                    <p class="mb-0 small text-muted">Matriz de correlación entre variables clínicas numéricas. Valores cercanos a 1 indican correlación positiva, cercanos a -1 negativa.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm p-4">
+            <div id="heatmapLoading" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2 text-muted">Calculando correlaciones...</p>
+            </div>
+            <div id="heatmapContainer" style="display:none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-semibold mb-0"><i class="bi bi-grid-3x3 me-2 text-primary"></i>Correlación entre Variables Clínicas</h6>
+                    <div class="d-flex align-items-center gap-2 small text-muted">
+                        <span class="badge" style="background:#1a237e;padding:4px 8px">-1.0 Neg.</span>
+                        <span class="badge" style="background:#e3f2fd;color:#333;padding:4px 8px">0 Nula</span>
+                        <span class="badge" style="background:#b71c1c;padding:4px 8px">+1.0 Pos.</span>
+                    </div>
+                </div>
+                <div style="overflow-x:auto">
+                    <canvas id="chartHeatmap"></canvas>
+                </div>
+                <div id="heatmapLeyenda" class="mt-4 row g-2"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let diagChart, edadRiesgoChart, sexoChart, imcChart, diagSegChart;
+
+async function loadKpis() {
+    try {
+        const [kpis, diagData, edadData] = await Promise.all([
+            apiCall('/analytics/kpis/'),
+            apiCall('/analytics/segmentacion/diagnostico/'),
+            apiCall('/analytics/tendencia-edad/'),
+        ]);
+        renderKpiCards(kpis);
+        renderDiagChart(diagData);
+        renderEdadRiesgoChart(edadData);
+    } catch (e) { showToast('Error cargando KPIs', 'danger'); }
+}
+
+function renderKpiCards(d) {
+    const container = document.getElementById('kpiCards');
+    if (d.total_pacientes === 0) {
+        container.innerHTML = `<div class="col-12 text-center py-4 text-muted">
+            <i class="bi bi-database-x fs-2 d-block mb-2"></i>Sin datos. Ejecute el proceso ETL primero.</div>`;
+        return;
+    }
+    const cards = [
+        { label: 'Total Pacientes', val: d.total_pacientes, icon: 'people-fill', color: '#0d6efd', bg: '#e7f0ff' },
+        { label: 'Críticos', val: `${d.pacientes_criticos} (${d.porcentaje_criticos}%)`, icon: 'heart-pulse-fill', color: '#dc3545', bg: '#fde8ea' },
+        { label: 'Hipertensos', val: `${d.pacientes_hipertensos} (${d.porcentaje_hipertensos}%)`, icon: 'droplet-fill', color: '#fd7e14', bg: '#fff3e0' },
+        { label: 'Diabéticos', val: `${d.pacientes_diabeticos} (${d.porcentaje_diabeticos}%)`, icon: 'capsule', color: '#6f42c1', bg: '#f0ebff' },
+        { label: 'Fumadores', val: d.pacientes_fumadores, icon: 'wind', color: '#0dcaf0', bg: '#e0f7fa' },
+        { label: 'Prom. Edad', val: d.promedio_edad + ' años', icon: 'calendar3', color: '#198754', bg: '#e8f5e9' },
+        { label: 'Prom. IMC', val: d.promedio_imc, icon: 'person-fill', color: '#ffc107', bg: '#fffde7' },
+        { label: 'Prom. Glucosa', val: d.promedio_glucosa + ' mg/dL', icon: 'activity', color: '#20c997', bg: '#e0f5ef' },
+    ];
+    container.innerHTML = cards.map(c => `
+        <div class="col-xl-3 col-md-4 col-6">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;background:${c.bg};border-radius:10px;display:flex;align-items:center;justify-content:center">
+                        <i class="bi bi-${c.icon}" style="color:${c.color};font-size:1.2rem"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" style="color:${c.color}">${c.val}</div>
+                        <div class="small text-muted">${c.label}</div>
+                    </div>
+                </div>
+            </div>
+        </div>`).join('');
+}
+
+function renderDiagChart(data) {
+    if (diagChart) diagChart.destroy();
+    const colors = ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#0dcaf0','#fd7e14'];
+    diagChart = new Chart(document.getElementById('chartDiag'), {
+        type: 'doughnut',
+        data: {
+            labels: data.map(d => d.diagnostico_preliminar),
+            datasets: [{ data: data.map(d => d.total), backgroundColor: colors, borderWidth: 3 }]
+        },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '55%' }
+    });
+}
+
+function renderEdadRiesgoChart(data) {
+    if (edadRiesgoChart) edadRiesgoChart.destroy();
+    edadRiesgoChart = new Chart(document.getElementById('chartEdadRiesgo'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.grupo_edad),
+            datasets: [
+                { label: 'Bajo', data: data.map(d => d.bajo), backgroundColor: '#198754' },
+                { label: 'Medio', data: data.map(d => d.medio), backgroundColor: '#ffc107' },
+                { label: 'Alto', data: data.map(d => d.alto), backgroundColor: '#fd7e14' },
+                { label: 'Crítico', data: data.map(d => d.critico), backgroundColor: '#dc3545' },
+            ]
+        },
+        options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+async function loadEstadisticas() {
+    try {
+        const data = await apiCall('/analytics/estadisticas/');
+        const labels = {
+            edad: 'Edad (años)', peso: 'Peso (kg)', altura: 'Altura (m)', imc: 'IMC',
+            presion_sistolica: 'Presión Sistólica', presion_diastolica: 'Presión Diastólica',
+            frecuencia_cardiaca: 'Frecuencia Cardíaca', glucosa: 'Glucosa (mg/dL)',
+            colesterol: 'Colesterol (mg/dL)', saturacion_oxigeno: 'Saturación O₂ (%)', temperatura: 'Temperatura (°C)'
+        };
+        const tbody = document.getElementById('tablaEstadisticas');
+        tbody.innerHTML = Object.entries(data).map(([k, v]) => `
+            <tr>
+                <td><strong>${labels[k] || k}</strong></td>
+                <td>${v.media}</td><td>${v.mediana}</td><td>${v.moda}</td>
+                <td>${v.desviacion_std}</td><td>${v.minimo}</td><td>${v.maximo}</td>
+                <td><small class="text-muted">${v.n}</small></td>
+            </tr>`).join('');
+    } catch (e) { showToast('Error cargando estadísticas', 'danger'); }
+}
+
+async function loadSegmentacion() {
+    try {
+        const [sexo, imc, diag] = await Promise.all([
+            apiCall('/analytics/segmentacion/sexo/'),
+            apiCall('/analytics/segmentacion/imc/'),
+            apiCall('/analytics/segmentacion/diagnostico/'),
+        ]);
+        if (sexoChart) sexoChart.destroy();
+        sexoChart = new Chart(document.getElementById('chartSexoSeg'), {
+            type: 'bar',
+            data: {
+                labels: sexo.map(d => d.sexo === 'M' ? 'Masculino' : 'Femenino'),
+                datasets: [
+                    { label: 'Total', data: sexo.map(d => d.total), backgroundColor: '#0d6efd' },
+                    { label: 'Hipertensos', data: sexo.map(d => d.hipertensos), backgroundColor: '#fd7e14' },
+                    { label: 'Diabéticos', data: sexo.map(d => d.diabeticos), backgroundColor: '#6f42c1' },
+                    { label: 'Críticos', data: sexo.map(d => d.criticos), backgroundColor: '#dc3545' },
+                ]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+        if (imcChart) imcChart.destroy();
+        const imcColors = { 'Bajo peso': '#0dcaf0', 'Normal': '#198754', 'Sobrepeso': '#ffc107', 'Obesidad': '#dc3545' };
+        imcChart = new Chart(document.getElementById('chartImcSeg'), {
+            type: 'pie',
+            data: {
+                labels: imc.map(d => d.imc_clasificacion),
+                datasets: [{ data: imc.map(d => d.total), backgroundColor: imc.map(d => imcColors[d.imc_clasificacion] || '#adb5bd') }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+        if (diagSegChart) diagSegChart.destroy();
+        diagSegChart = new Chart(document.getElementById('chartDiagSeg'), {
+            type: 'bar',
+            data: {
+                labels: diag.map(d => d.diagnostico_preliminar),
+                datasets: [
+                    { label: 'Total', data: diag.map(d => d.total), backgroundColor: '#0d6efd' },
+                    { label: 'Riesgo Alto/Crítico', data: diag.map(d => d.riesgo_alto), backgroundColor: '#dc3545' },
+                ]
+            },
+            options: { indexAxis: 'y', plugins: { legend: { position: 'bottom' } } }
+        });
+    } catch (e) { showToast('Error cargando segmentación', 'danger'); }
+}
+
+async function loadCriticos() {
+    try {
+        const data = await apiCall('/analytics/pacientes-criticos/');
+        document.getElementById('totalCriticos').textContent = data.total || 0;
+        const tbody = document.getElementById('tablaCriticos');
+        if (!data.pacientes || !data.pacientes.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">No hay pacientes críticos</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.pacientes.map(p => `<tr>
+            <td><strong>${p.nombres} ${p.apellidos}</strong></td>
+            <td>${p.edad}</td>
+            <td>${p.sexo === 'M' ? 'Masculino' : 'Femenino'}</td>
+            <td><span class="badge ${p.presion_sistolica > 180 ? 'bg-danger' : 'bg-warning text-dark'}">${p.presion_sistolica} mmHg</span></td>
+            <td><span class="badge ${p.glucosa > 300 ? 'bg-danger' : 'bg-secondary'}">${(p.glucosa||0).toFixed(1)}</span></td>
+            <td><span class="badge ${p.saturacion_oxigeno < 85 ? 'bg-danger' : 'bg-success'}">${(p.saturacion_oxigeno||0).toFixed(1)}%</span></td>
+            <td><small>${p.diagnostico_preliminar}</small></td>
+            <td>${riskBadge(p.riesgo_enfermedad)}</td>
+        </tr>`).join('');
+    } catch (e) { showToast('Error cargando críticos', 'danger'); }
+}
+
+loadKpis();
+
+let heatmapChart = null;
+
+async function loadHeatmap() {
+    try {
+        const data = await apiCall('/analytics/heatmap/');
+        document.getElementById('heatmapLoading').style.display = 'none';
+        document.getElementById('heatmapContainer').style.display = 'block';
+
+        const labels = data.labels;
+        const matrix = data.matrix;
+        const n = labels.length;
+
+        const values = Array.from({length: n}, () => Array(n).fill(0));
+        matrix.forEach(cell => {
+            const xi = labels.indexOf(cell.x);
+            const yi = labels.indexOf(cell.y);
+            if (xi >= 0 && yi >= 0) values[yi][xi] = cell.v;
+        });
+
+        function corrColor(v) {
+            const r = v >= 0 ? Math.round(183 + (v * 72))  : Math.round(255 + (v * 72));
+            const g = v >= 0 ? Math.round(28  + (v * 200)) : Math.round(28  + (v * 200));
+            const b = v >= 0 ? Math.round(28  - (v * 28))  : Math.round(158 - (v * 158));
+            const alpha = Math.abs(v) < 0.05 ? 0.15 : 0.2 + Math.abs(v) * 0.8;
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        const datasets = values.map((row, rowIdx) => ({
+            label: labels[rowIdx],
+            data: row.map((v, colIdx) => ({ x: labels[colIdx], y: labels[rowIdx], v })),
+            backgroundColor: row.map(v => corrColor(v)),
+            borderColor: 'rgba(200,200,200,0.3)',
+            borderWidth: 1,
+        }));
+
+        const cellPlugin = {
+            id: 'heatmapLabels',
+            afterDatasetsDraw(chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, di) => {
+                    const meta = chart.getDatasetMeta(di);
+                    meta.data.forEach((bar, i) => {
+                        const v = dataset.data[i].v;
+                        const absV = Math.abs(v);
+                        ctx.save();
+                        ctx.fillStyle = absV > 0.5 ? 'white' : '#333';
+                        ctx.font = 'bold 11px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(v.toFixed(2), bar.x, bar.y);
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        if (heatmapChart) heatmapChart.destroy();
+        const canvas = document.getElementById('chartHeatmap');
+        canvas.width = Math.max(600, n * 80);
+        canvas.height = Math.max(400, n * 60);
+
+        heatmapChart = new Chart(canvas, {
+            type: 'bar',
+            plugins: [cellPlugin],
+            data: { labels, datasets },
+            options: {
+                responsive: false,
+                indexAxis: 'y',
+                scales: {
+                    x: { stacked: true, display: true, ticks: { display: false }, grid: { display: false }, max: n },
+                    y: { stacked: true, ticks: { font: { size: 11, weight: 'bold' } }, grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const d = items[0].dataset.data[items[0].dataIndex];
+                                return `${d.y} × ${d.x}`;
+                            },
+                            label: (item) => {
+                                const v = item.dataset.data[item.dataIndex].v;
+                                const interp = v > 0.7 ? 'Muy fuerte positiva'
+                                    : v > 0.4 ? 'Moderada positiva'
+                                    : v > 0.1 ? 'Débil positiva'
+                                    : v < -0.7 ? 'Muy fuerte negativa'
+                                    : v < -0.4 ? 'Moderada negativa'
+                                    : v < -0.1 ? 'Débil negativa'
+                                    : 'Sin correlación';
+                                return `Correlación: ${v.toFixed(3)} (${interp})`;
+                            }
+                        }
+                    }
+                },
+                barThickness: 44,
+            }
+        });
+
+        const leyenda = document.getElementById('heatmapLeyenda');
+        const insights = [];
+        for (let i = 0; i < n; i++) {
+            for (let j = i+1; j < n; j++) {
+                const v = values[i][j];
+                if (Math.abs(v) > 0.35) insights.push({ a: labels[i], b: labels[j], v });
+            }
+        }
+        insights.sort((a,b) => Math.abs(b.v) - Math.abs(a.v));
+        leyenda.innerHTML = insights.slice(0,6).map(ins => {
+            const col = ins.v > 0 ? '#b71c1c' : '#1a237e';
+            const bg  = ins.v > 0 ? '#fde8ea' : '#e8eaf6';
+            const dir = ins.v > 0 ? '↑ Positiva' : '↓ Negativa';
+            return `<div class="col-md-4">
+                <div class="p-2 rounded-3 d-flex align-items-center gap-2" style="background:${bg}">
+                    <span style="color:${col};font-weight:700;font-size:18px">${ins.v > 0 ? '▲' : '▼'}</span>
+                    <div>
+                        <div style="font-size:12px;font-weight:600;color:${col}">${ins.a} — ${ins.b}</div>
+                        <div style="font-size:11px;color:#555">${dir}: ${ins.v.toFixed(3)}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+    } catch (e) {
+        document.getElementById('heatmapLoading').innerHTML =
+            '<p class="text-danger text-center py-4"><i class="bi bi-exclamation-circle me-2"></i>Error cargando heatmap. Ejecute el ETL primero.</p>';
+    }
+}
+
+document.querySelectorAll('#analyticsTabs .nav-link').forEach(tab => {
+    tab.addEventListener('shown.bs.tab', e => {
+        const target = e.target.getAttribute('href');
+        if (target === '#tabEstadisticas') loadEstadisticas();
+        else if (target === '#tabSegmentacion') loadSegmentacion();
+        else if (target === '#tabCriticos') loadCriticos();
+        else if (target === '#tabHeatmap') loadHeatmap();
+    });
+});
+</script>
+{% endblock %}

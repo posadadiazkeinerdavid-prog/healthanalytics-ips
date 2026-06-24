@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: healthanalytics-ips
+    env: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --chdir backend
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com,http://localhost:8000"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://*.onrender.com,http://localhost:8000"
+      - key: JWT_ACCESS_TOKEN_LIFETIME_MINUTES
+        value: "60"
+      - key: JWT_REFRESH_TOKEN_LIFETIME_DAYS
+        value: "7"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: healthanalytics-db
+          property: connectionString
+
+databases:
+  - name: healthanalytics-db
+    databaseName: healthanalytics
+    plan: free
