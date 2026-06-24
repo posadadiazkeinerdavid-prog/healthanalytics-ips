@@ -150,29 +150,7 @@ function startStepAnimation() {
     }, 1200);
 }
 
-async function runEtlBase() {
-    const btn = document.getElementById('btnRunEtl');
-    btn.disabled = true;
-    document.getElementById('progressCard').style.display = 'block';
-    document.getElementById('resultCard').style.display = 'none';
-    document.getElementById('progressMsg').textContent = 'Ejecutando ETL con dataset base...';
-    const interval = startStepAnimation();
 
-    try {
-        const res = await apiCall('/etl/run/', 'POST');
-        clearInterval(interval);
-        document.getElementById('progressCard').style.display = 'none';
-        showResult(res);
-        loadHistory();
-        showToast('ETL completado exitosamente', 'success');
-    } catch (err) {
-        clearInterval(interval);
-        document.getElementById('progressCard').style.display = 'none';
-        showToast('Error en ETL: ' + err.message, 'danger');
-    } finally {
-        btn.disabled = false;
-    }
-}
 
 async function uploadAndRun() {
     const fileInput = document.getElementById('fileInput');
@@ -190,7 +168,7 @@ async function uploadAndRun() {
     btn.disabled = true;
     document.getElementById('progressCard').style.display = 'block';
     document.getElementById('resultCard').style.display = 'none';
-    document.getElementById('progressMsg').textContent = `Subiendo y procesando: ${file.name}`;
+    document.getElementById('progressMsg').textContent = `Subiendo y procesando: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
     const interval = startStepAnimation();
 
     const formData = new FormData();
@@ -207,9 +185,21 @@ async function uploadAndRun() {
             body: formData
         });
 
-        let data;
+                let data;
         try { data = await res.json(); }
-        catch { data = { error: `Error HTTP ${res.status} — respuesta no válida` }; }
+        catch {
+            if (res.status === 413) {
+                data = { error: 'El archivo es demasiado grande. Máximo 50 MB.' };
+            } else if (res.status === 400) {
+                data = { error: 'Solicitud inválida. Verifique el archivo seleccionado.' };
+            } else if (res.status === 403) {
+                data = { error: 'No tiene permisos para esta acción. Necesita rol Administrador o Analista.' };
+            } else if (res.status === 401) {
+                data = { error: 'Sesión expirada. Inicie sesión nuevamente.' };
+            } else {
+                data = { error: `Error HTTP ${res.status} — respuesta no válida del servidor` };
+            }
+        }
 
         clearInterval(interval);
         document.getElementById('progressCard').style.display = 'none';
@@ -217,12 +207,12 @@ async function uploadAndRun() {
         if (res.ok && data.status === 'COMPLETADO') {
             showResult(data);
             loadHistory();
-            fileInput.value = ''; // limpiar el input para permitir subir otro
+            fileInput.value = '';
             showToast(`ETL completado: ${data.registros_cargados} registros cargados`, 'success');
         } else {
             const msg = data.error || data.detail || `Error ${res.status}`;
             showToast('Error en ETL: ' + msg, 'danger');
-            if (data.log) showResult(data); // mostrar log aunque haya error
+            if (data.log) showResult(data);
         }
     } catch (err) {
         clearInterval(interval);
