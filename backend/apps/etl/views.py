@@ -4,6 +4,7 @@ ETL Views - Ejecución ETL, subida CSV, gestión de pacientes
 
 import os
 import tempfile
+import threading
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import status, generics, filters
@@ -16,6 +17,9 @@ from apps.authentication.permissions import IsAdminOrAnalista, IsAdministrador
 from .models import Paciente, ETLHistory
 from .serializers import PacienteSerializer, PacienteListSerializer, ETLHistorySerializer
 from .services import ETLService
+
+_etl_lock = threading.Lock()
+_etl_running = False
 
 
 # ─── PACIENTES ──────────────────────────────────────────────────────────────────
@@ -62,6 +66,13 @@ def run_etl_base_dataset(request):
     """
     Ejecuta ETL sobre el dataset base (Excel incluido en el proyecto)
     """
+    global _etl_running
+    if _etl_running:
+        return Response(
+            {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
+            status=status.HTTP_409_CONFLICT
+        )
+
     base_path = os.path.join(settings.DATASETS_DIR, 'dataset_clinico_etl_1800_registros.xlsx')
     if not os.path.exists(base_path):
         return Response(
@@ -76,9 +87,24 @@ def run_etl_base_dataset(request):
         estado='EN_PROCESO',
     )
 
-    service = ETLService()
-    result = service.run(base_path, source_type='DATASET_BASE', etl_record=etl_record)
-    etl_record.refresh_from_db()
+    try:
+        _etl_running = True
+        service = ETLService()
+        result = service.run(base_path, source_type='DATASET_BASE', etl_record=etl_record)
+    except Exception as e:
+        etl_record.estado = 'ERROR'
+        etl_record.mensaje_error = str(e)
+        etl_record.fecha_fin = timezone.now()
+        etl_record.save()
+        return Response({
+            'etl_id': etl_record.id,
+            'status': 'ERROR',
+            'error': str(e),
+            'log': f'Error crítico durante el ETL: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    finally:
+        _etl_running = False
+        etl_record.refresh_from_db()
 
     return Response({
         'etl_id': etl_record.id,
@@ -93,6 +119,13 @@ def upload_and_run_etl(request):
     """
     Sube un archivo CSV/Excel y ejecuta ETL automáticamente
     """
+    global _etl_running
+    if _etl_running:
+        return Response(
+            {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
+            status=status.HTTP_409_CONFLICT
+        )
+
     archivo = request.FILES.get('archivo')
     if not archivo:
         return Response(
@@ -135,6 +168,7 @@ def upload_and_run_etl(request):
     )
 
     try:
+        _etl_running = True
         service = ETLService()
         result = service.run(
             tmp_path,
@@ -142,7 +176,6 @@ def upload_and_run_etl(request):
             etl_record=etl_record
         )
     except Exception as e:
-        # Marcar el registro ETL como ERROR — nunca debe quedar en EN_PROCESO
         etl_record.estado = 'ERROR'
         etl_record.mensaje_error = str(e)
         etl_record.fecha_fin = timezone.now()
@@ -154,6 +187,7 @@ def upload_and_run_etl(request):
             'log': f'Error crítico durante el ETL: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
+        _etl_running = False
         if tmp_path and os.path.exists(tmp_path):
             os.unlink(tmp_path)
 

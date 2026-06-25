@@ -27,9 +27,14 @@ class PacienteListSerializer(serializers.ModelSerializer):
 
 
 class ETLHistorySerializer(serializers.ModelSerializer):
-    usuario_nombre = serializers.CharField(source='usuario.full_name', read_only=True)
+    usuario_nombre = serializers.SerializerMethodField()
 
     class Meta:
         model = ETLHistory
         fields = '__all__'
         read_only_fields = ['fecha_inicio', 'fecha_fin']
+
+    def get_usuario_nombre(self, obj):
+        if obj.usuario:
+            return obj.usuario.full_name
+        return 'Sistema'
