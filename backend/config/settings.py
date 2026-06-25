@@ -163,6 +163,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATASETS_DIR = BASE_DIR / 'datasets'
 MODELS_DIR = BASE_DIR / 'ml_models'
 
+DATASETS_DIR.mkdir(exist_ok=True)
+MODELS_DIR.mkdir(exist_ok=True)
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
