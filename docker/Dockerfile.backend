@@ -15,6 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p ../datasets ../ml_models ../logs
+RUN mkdir -p datasets ml_models logs
 
 EXPOSE 8000

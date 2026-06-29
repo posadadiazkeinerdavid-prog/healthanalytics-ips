@@ -5,6 +5,7 @@ import dj_database_url
 DEBUG = False
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # PostgreSQL con dj-database-url
 DATABASES = {
@@ -15,7 +16,6 @@ DATABASES = {
     )
 }
 
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 CORS_ALLOW_ALL_ORIGINS = True

@@ -14,7 +14,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./docs/setup_mysql.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ../docs/setup_mysql.sql:/docker-entrypoint-initdb.d/setup.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
@@ -41,10 +41,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-      - ./datasets:/app/../datasets
-      - ./ml_models:/app/../ml_models
-      - ./logs:/app/../logs
+      - ../backend:/app
+      - ../datasets:/app/datasets
+      - ../ml_models:/app/ml_models
+      - ../logs:/app/logs
     command: >
       sh -c "python manage.py migrate &&
              python manage.py seed_users &&

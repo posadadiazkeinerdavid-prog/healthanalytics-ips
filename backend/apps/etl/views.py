@@ -19,7 +19,19 @@ from .serializers import PacienteSerializer, PacienteListSerializer, ETLHistoryS
 from .services import ETLService
 
 _etl_lock = threading.Lock()
-_etl_running = False
+
+
+def etl_is_running():
+    return getattr(threading.current_thread(), '_etl_running', False)
+
+def etl_acquire():
+    if etl_is_running():
+        return False
+    threading.current_thread()._etl_running = True
+    return True
+
+def etl_release():
+    threading.current_thread()._etl_running = False
 
 
 # ─── PACIENTES ──────────────────────────────────────────────────────────────────
@@ -66,12 +78,12 @@ def run_etl_base_dataset(request):
     """
     Ejecuta ETL sobre el dataset base (Excel incluido en el proyecto)
     """
-    global _etl_running
-    if _etl_running:
-        return Response(
-            {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
-            status=status.HTTP_409_CONFLICT
-        )
+    with _etl_lock:
+        if not etl_acquire():
+            return Response(
+                {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
+                status=status.HTTP_409_CONFLICT
+            )
 
     base_path = os.path.join(settings.DATASETS_DIR, 'dataset_clinico_etl_1800_registros.xlsx')
     if not os.path.exists(base_path):
@@ -88,7 +100,6 @@ def run_etl_base_dataset(request):
     )
 
     try:
-        _etl_running = True
         service = ETLService()
         result = service.run(base_path, source_type='DATASET_BASE', etl_record=etl_record)
     except Exception as e:
@@ -103,7 +114,8 @@ def run_etl_base_dataset(request):
             'log': f'Error crítico durante el ETL: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
-        _etl_running = False
+        with _etl_lock:
+            etl_release()
         etl_record.refresh_from_db()
 
     return Response({
@@ -119,12 +131,12 @@ def upload_and_run_etl(request):
     """
     Sube un archivo CSV/Excel y ejecuta ETL automáticamente
     """
-    global _etl_running
-    if _etl_running:
-        return Response(
-            {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
-            status=status.HTTP_409_CONFLICT
-        )
+    with _etl_lock:
+        if not etl_acquire():
+            return Response(
+                {'error': 'Ya hay un proceso ETL en ejecución. Espere a que finalice.'},
+                status=status.HTTP_409_CONFLICT
+            )
 
     archivo = request.FILES.get('archivo')
     if not archivo:
@@ -168,7 +180,6 @@ def upload_and_run_etl(request):
     )
 
     try:
-        _etl_running = True
         service = ETLService()
         result = service.run(
             tmp_path,
@@ -187,7 +198,8 @@ def upload_and_run_etl(request):
             'log': f'Error crítico durante el ETL: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
-        _etl_running = False
+        with _etl_lock:
+            etl_release()
         if tmp_path and os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
