@@ -101,6 +101,7 @@ else:
     }
 
 AUTH_USER_MODEL = 'authentication.User'
+LOGIN_URL = '/login/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
